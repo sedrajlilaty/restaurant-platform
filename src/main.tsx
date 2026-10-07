@@ -1,15 +1,22 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { applyTheme } from "@/features/theme/applyTheme"
-import { DEFAULT_THEME } from "@/features/theme/presets"
+import { StrictMode } from "react"
+import { createRoot } from "react-dom/client"
+import "./index.css"
+import "@/lib/i18n"
+import App from "./App.tsx"
+import { Providers } from "@/app/providers"
 
-document.documentElement.dir = "rtl"
-document.documentElement.lang = "ar"
-applyTheme(DEFAULT_THEME, "ar")
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+async function enableMocks() {
+  if (import.meta.env.VITE_USE_MOCKS !== "true") return
+  const { worker } = await import("@/mocks/browser")
+  await worker.start({ onUnhandledRequest: "bypass" })
+}
+
+void enableMocks().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <Providers>
+        <App />
+      </Providers>
+    </StrictMode>,
+  )
+})

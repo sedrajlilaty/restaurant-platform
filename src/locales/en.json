@@ -1,0 +1,7 @@
+{
+  "common": { "loading": "Loading...", "retry": "Try again" },
+  "tenant": {
+    "notFound": "This restaurant doesn't exist",
+    "loadError": "Couldn't load the page"
+  }
+}
