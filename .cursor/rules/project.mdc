@@ -1,0 +1,20 @@
+---
+description: Conventions for the restaurant platform
+alwaysApply: true
+---
+
+# Project
+Multi-tenant restaurant platform (React + Vite + TypeScript). Customer routes, restaurant admin routes (/admin), super admin routes (/super). Orders are sent to the restaurant's WhatsApp, there is no order tracking inside the app.
+
+# Rules
+- TypeScript only, no `any`. Define types in the feature's own `*.types.ts`.
+- Structure is feature-based: `src/features/<feature>`. A feature never imports from another feature. Shared code goes to `components/shared`, `hooks`, `lib`.
+- UI: shadcn/ui components from `@/components/ui`. Tailwind v4 only.
+- RTL first: use logical classes (`ms-`, `me-`, `ps-`, `pe-`, `start-`, `end-`, `text-start`). Never `left/right/ml/mr/pl/pr`.
+- Mobile first and responsive. Customer pages are mostly opened from a QR scan on a phone.
+- Colors only through theme tokens (`bg-primary`, `text-muted-foreground`, `bg-brand-accent`...). Never hard-coded hex values.
+- All user-facing text goes through i18next (`t("key")`) with keys in `locales/ar.json` and `locales/en.json`. No hard-coded strings.
+- Server data: TanStack Query. HTTP: the axios instance in `lib/api.ts`. Forms: react-hook-form + zod. Cart state: zustand (`cart.store.ts`).
+- The restaurant is identified from the hostname, not from the URL path.
+- Gated features use the `useFeature("name")` hook.
+- Do not install new packages without asking.

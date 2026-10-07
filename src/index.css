@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-accent-foreground: var(--brand-accent-foreground);
+}
+
+@layer base {
+  html,
+  body {
+    font-family: var(--app-font, "IBM Plex Sans Arabic", "Inter Variable", system-ui, sans-serif);
+  }
+}
