@@ -4,7 +4,8 @@ import "./index.css"
 import "@/lib/i18n"
 import App from "./App.tsx"
 import { Providers } from "@/app/providers"
-
+import { installAuthInterceptor } from "@/features/auth/auth.interceptor"
+installAuthInterceptor()
 async function enableMocks() {
   if (import.meta.env.VITE_USE_MOCKS !== "true") return
   const { worker } = await import("@/mocks/browser")

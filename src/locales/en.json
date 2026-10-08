@@ -1,7 +1,59 @@
 {
-  "common": { "loading": "Loading...", "retry": "Try again" },
-  "tenant": {
-    "notFound": "This restaurant doesn't exist",
-    "loadError": "Couldn't load the page"
-  }
+  "common": { "loading": "Loading...", "retry": "Try again", "logout": "Log out" },
+  "tenant": { "notFound": "This restaurant doesn't exist", "loadError": "Couldn't load the page" },
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "products": "Products",
+    "options": "Sizes & Extras",
+    "coupons": "Coupons",
+    "banners": "Banners & Offers",
+    "tables": "Tables & QR",
+    "deliveryZones": "Delivery Zones",
+    "analytics": "Analytics",
+    "appearance": "Appearance",
+    "settings": "Settings",
+    "importExport": "Import & Export",
+    "snapshots": "System Restore",
+    "account": "My Account",
+    "restaurants": "Restaurants",
+    "plans": "Plans",
+    "subscriptions": "Subscriptions",
+    "category": "Category",
+    "product": "Product",
+    "search": "Search",
+    "about": "About",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "orderSuccess": "Order sent",
+    "table": "Table"
+  },
+  "auth": {
+    "title": "Log in",
+    "platformTitle": "Platform Admin",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Log in",
+    "submitting": "Logging in...",
+    "invalid": "Wrong email or password",
+    "error": "Something went wrong, please try again",
+    "forbidden": "You don't have access to this page"
+  },
+  "validation": {
+    "email": "Enter a valid email",
+    "passwordMin": "Password must be at least 6 characters"
+  },
+  "layout": { "superPanel": "Platform Admin" },
+  "subscription": {
+    "expiredTitle": "Service temporarily unavailable",
+    "expiredBody": "This restaurant's subscription has ended. Please contact the platform team to renew.",
+    "endingSoon": "Your subscription ends in {{count}} days. Contact the platform team to renew.",
+    "endsToday": "Your subscription ends today. Contact the platform team to renew."
+  },
+  "featureLocked": {
+    "title": "This feature isn't in your plan",
+    "body": "Contact the platform team to upgrade your plan."
+  },
+  "notFound": { "title": "Page not found", "back": "Back to home" },
+  "placeholder": { "soon": "This page is under construction" }
 }
