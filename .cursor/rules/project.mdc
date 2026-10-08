@@ -18,3 +18,6 @@ Multi-tenant restaurant platform (React + Vite + TypeScript). Customer routes, r
 - The restaurant is identified from the hostname, not from the URL path.
 - Gated features use the `useFeature("name")` hook.
 - Do not install new packages without asking.
+- Validate every form on the client with zod (messages are i18n keys), in addition to the server's validation. Show server errors on the matching fields.
+- Visual language: warm soft background, cards are `rounded-3xl border bg-card shadow-sm`, pill-shaped chips, round icon buttons, round primary "+" buttons. Mobile uses a floating bottom nav bar with a raised cart button. Admin uses a floating rounded sidebar card on desktop and a bottom nav on mobile.
+- Product cards: image on top with a badge pill, name, short description, optional rating, price, and a round add button.

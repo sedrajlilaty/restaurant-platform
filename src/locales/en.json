@@ -26,7 +26,8 @@
     "cart": "Cart",
     "checkout": "Checkout",
     "orderSuccess": "Order sent",
-    "table": "Table"
+    "table": "Table",
+    "navGroups": { "menu": "Menu", "marketing": "Marketing", "operations": "Operations", "store": "Store" }
   },
   "auth": {
     "title": "Log in",

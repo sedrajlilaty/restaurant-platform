@@ -26,7 +26,8 @@
     "cart": "السلة",
     "checkout": "إتمام الطلب",
     "orderSuccess": "تم إرسال الطلب",
-    "table": "الطاولة"
+    "table": "الطاولة",
+    "navGroups": { "menu": "القائمة", "marketing": "التسويق", "operations": "التشغيل", "store": "المتجر" }
   },
   "auth": {
     "title": "تسجيل الدخول",

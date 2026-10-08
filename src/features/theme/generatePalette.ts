@@ -3,12 +3,11 @@ import a11yPlugin from "colord/plugins/a11y"
 import type { Theme, ThemeRadius } from "./theme.types"
 
 extend([a11yPlugin])
-
 const RADIUS: Record<ThemeRadius, string> = {
-  sm: "0.375rem",
-  md: "0.625rem",
-  lg: "0.875rem",
-  xl: "1.25rem",
+  sm: "0.5rem",
+  md: "0.75rem",
+  lg: "1rem",
+  xl: "1.5rem",
 }
 
 function readableOn(bg: string) {
@@ -28,16 +27,15 @@ export function generatePalette(theme: Theme) {
   const dark = theme.mode === "dark"
   const { h } = colord(theme.colors.primary).toHsl()
   const tone = (s: number, l: number) => colord({ h, s, l }).toHex()
+const bg = dark ? tone(20, 8) : tone(45, 93)
+const card = dark ? tone(18, 12) : tone(55, 97)
+const fg = dark ? tone(20, 94) : tone(30, 15)
+const mutedBg = dark ? tone(15, 16) : tone(40, 89)
+const mutedFg = dark ? tone(10, 66) : tone(12, 38)
+const border = dark ? tone(15, 22) : tone(35, 84)
+const softAccent = dark ? tone(25, 18) : tone(40, 89)
 
-  const bg = dark ? tone(20, 8) : tone(40, 97)
-  const card = dark ? tone(18, 12) : "#ffffff"
-  const fg = dark ? tone(20, 94) : tone(25, 12)
-  const mutedBg = dark ? tone(15, 16) : tone(30, 94)
-  const mutedFg = dark ? tone(10, 66) : tone(10, 38)
-  const border = dark ? tone(15, 22) : tone(22, 88)
-  const softAccent = dark ? tone(25, 18) : tone(35, 93)
-
-  const primary = ensureContrast(theme.colors.primary, bg, 4.5, dark ? "lighten" : "darken")
+const primary = ensureContrast(theme.colors.primary, bg, 3.5, dark ? "lighten" : "darken")
   const adjusted = primary.toLowerCase() !== colord(theme.colors.primary).toHex().toLowerCase()
   const brandAccent = colord(theme.colors.accent).toHex()
 
@@ -70,15 +68,14 @@ export function generatePalette(theme: Theme) {
     "--chart-3": colord(primary).rotate(40).toHex(),
     "--chart-4": colord(primary).rotate(-40).toHex(),
     "--chart-5": tone(10, 55),
-
-    "--sidebar": tone(35, 14),
-    "--sidebar-foreground": tone(15, 92),
-    "--sidebar-primary": brandAccent,
-    "--sidebar-primary-foreground": readableOn(brandAccent),
-    "--sidebar-accent": tone(30, 22),
-    "--sidebar-accent-foreground": tone(15, 95),
-    "--sidebar-border": tone(25, 24),
-    "--sidebar-ring": brandAccent,
+    "--sidebar": card,
+    "--sidebar-foreground": fg,
+    "--sidebar-primary": primary,
+    "--sidebar-primary-foreground": readableOn(primary),
+    "--sidebar-accent": mutedBg,
+    "--sidebar-accent-foreground": fg,
+    "--sidebar-border": border,
+    "--sidebar-ring": primary,
   }
 
   return { vars, adjusted }
