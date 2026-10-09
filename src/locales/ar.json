@@ -1,5 +1,5 @@
 {
-  "common": { "loading": "جاري التحميل...", "retry": "إعادة المحاولة", "logout": "تسجيل خروج" },
+  "common": { "loading": "جاري التحميل...", "retry": "إعادة المحاولة", "logout": "تسجيل خروج","increase": "زيادة", "decrease": "إنقاص", "darkMode": "الوضع الداكن", "lightMode": "الوضع الفاتح" },
   "tenant": { "notFound": "هذا المطعم غير موجود", "loadError": "تعذر تحميل الصفحة" },
   "nav": {
     "home": "الرئيسية",
@@ -73,5 +73,23 @@
     "new": "جديد",
     "hot": "حار"
   }
+},
+"product": {
+  "back": "رجوع",
+  "required": "مطلوب",
+  "optional": "اختياري",
+  "chooseOne": "اختر خياراً واحداً",
+  "chooseUpTo": "اختر حتى {{count}}",
+  "errors": {
+    "required": "هذا الاختيار مطلوب",
+    "min": "اختر {{count}} على الأقل",
+    "max": "الحد الأقصى {{count}}"
+  },
+  "notes": "ملاحظات",
+  "notesPlaceholder": "مثلاً: بدون بصل",
+  "addToCart": "أضف إلى السلة",
+  "added": "تمت الإضافة",
+  "notFound": "هذا المنتج غير موجود",
+  "unavailable": "هذا المنتج غير متوفر حالياً"
 }
 }

@@ -57,7 +57,7 @@ export function HomePage() {
         <h2 className="text-lg font-bold">{title}</h2>
 
         {products.isPending ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {Array.from({ length: 4 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}

@@ -10,8 +10,7 @@ import { SuperAdminLayout } from "./layouts/SuperAdminLayout"
 import { RequireAuth } from "./guards/RequireAuth"
 import { RequireFeature } from "./guards/RequireFeature"
 import { ThemeDemoPage } from "../app/dev/ThemeDemoPage"
-import { HomePage } from "@/features/menu/pages/HomePage"
-// مؤقت: كل صفحة بنبنيها بنبدّل سطرها بالصفحة الحقيقية
+import { HomePage, ProductPage } from "@/features/menu"// مؤقت: كل صفحة بنبنيها بنبدّل سطرها بالصفحة الحقيقية
 const page = (titleKey: string): ReactNode => <PlaceholderPage titleKey={titleKey} />
 const gated = (feature: FeatureKey, titleKey: string): ReactNode => (
   <RequireFeature feature={feature}>{page(titleKey)}</RequireFeature>
@@ -25,8 +24,7 @@ export const restaurantRouter = createBrowserRouter([
       // { index: true, element: page("nav.home") },
       { index: true, element: <HomePage /> },
       { path: "category/:id", element: page("nav.category") },
-      { path: "product/:id", element: page("nav.product") },
-      { path: "search", element: page("nav.search") },
+{ path: "product/:id", element: <ProductPage /> },      { path: "search", element: page("nav.search") },
       { path: "about", element: page("nav.about") },
       { path: "cart", element: page("nav.cart") },
       { path: "checkout", element: page("nav.checkout") },

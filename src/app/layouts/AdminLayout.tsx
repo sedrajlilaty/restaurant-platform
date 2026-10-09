@@ -34,6 +34,7 @@ import type { FeatureKey } from "@/features/tenant/tenant.types"
 import { useRestaurant } from "@/features/tenant/useTenant"
 import { useDirection } from "@/hooks/useDirection"
 import { cn } from "@/lib/utils"
+import { ModeToggle } from "@/features/tenant"
 
 type NavItem = { to: string; label: string; icon: LucideIcon; feature?: FeatureKey; end?: boolean }
 type NavGroup = { label?: string; items: NavItem[] }
@@ -162,7 +163,10 @@ export function AdminLayout() {
               <span className="truncate font-bold md:hidden">{name}</span>
             </div>
             <div className="flex items-center gap-1">
-              <LanguageSwitcher />
+              <div className="flex justify-end gap-1">
+  <ModeToggle />
+  <LanguageSwitcher />
+</div>
               <Button variant="ghost" size="sm" className="gap-1" onClick={logout}>
                 <LogOut className="size-4" />
                 <span className="hidden sm:inline">{t("common.logout")}</span>
@@ -171,9 +175,10 @@ export function AdminLayout() {
           </header>
 
           {daysLeft <= 7 && <SubscriptionBanner daysLeft={daysLeft} />}
-
           <main className="flex-1 px-4 pb-32 md:px-0 md:pb-6">
-            <Outlet />
+            <div className="mx-auto w-full max-w-6xl">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

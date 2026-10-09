@@ -1,5 +1,5 @@
 {
-  "common": { "loading": "Loading...", "retry": "Try again", "logout": "Log out" },
+  "common": { "loading": "Loading...", "retry": "Try again", "logout": "Log out","increase": "Increase", "decrease": "Decrease", "darkMode": "Dark mode", "lightMode": "Light mode" },
   "tenant": { "notFound": "This restaurant doesn't exist", "loadError": "Couldn't load the page" },
   "nav": {
     "home": "Home",
@@ -73,5 +73,22 @@
     "new": "New",
     "hot": "Hot"
   }
+},"product": {
+  "back": "Back",
+  "required": "Required",
+  "optional": "Optional",
+  "chooseOne": "Choose one",
+  "chooseUpTo": "Choose up to {{count}}",
+  "errors": {
+    "required": "This choice is required",
+    "min": "Choose at least {{count}}",
+    "max": "Maximum {{count}}"
+  },
+  "notes": "Notes",
+  "notesPlaceholder": "e.g. no onions",
+  "addToCart": "Add to cart",
+  "added": "Added",
+  "notFound": "This product doesn't exist",
+  "unavailable": "This product is currently unavailable"
 }
 }

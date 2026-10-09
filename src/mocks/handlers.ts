@@ -1,7 +1,6 @@
 import { delay, http, HttpResponse } from "msw"
 import { tenants } from "./data"
-import { banners, categories, products } from "./menuData"
-
+import { banners, categories, optionGroupsByProduct, products } from "./menuData"
 export const handlers = [
   http.get("/api/public/restaurant", ({ request }) => {
     const host = new URL(request.url).searchParams.get("host") ?? ""
@@ -49,5 +48,12 @@ export const handlers = [
 
     const items = list.slice((page - 1) * limit, page * limit).map(({ featured: _f, ...product }) => product)
     return HttpResponse.json({ items, total: list.length })
+  }),
+    http.get("/api/public/products/:id", async ({ params }) => {
+    await delay(300)
+    const found = products.find((p) => p.id === params.id)
+    if (!found) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    const { featured: _featured, ...product } = found
+    return HttpResponse.json({ ...product, optionGroups: optionGroupsByProduct[found.id] ?? [] })
   }),
 ]

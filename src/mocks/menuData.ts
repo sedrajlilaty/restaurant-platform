@@ -1,5 +1,4 @@
-import type { Banner, Category, Product } from "@/features/menu/menu.types"
-
+import type { Banner, Category, OptionGroup, Product } from "@/features/menu"
 export const banners: Banner[] = [
   {
     id: "b1",
@@ -52,3 +51,37 @@ export const products: MockProduct[] = [
   { ...base, id: "p10", categoryId: "c5", name: { ar: "تشيز كيك", en: "Cheesecake" }, description: { ar: "تشيز كيك بالتوت", en: "Cheesecake with berries" }, price: 5, oldPrice: 6, badge: null, rating: { value: 4.6, count: 300 }, hasOptions: false, featured: false },
   { ...base, id: "p11", categoryId: "c5", name: { ar: "كنافة بالجبنة", en: "Cheese Kunafa" }, description: { ar: "كنافة ناعمة بالجبنة والقطر", en: "Soft kunafa with cheese and syrup" }, price: 5.5, badge: null, rating: null, available: false, hasOptions: false, featured: false },
 ]
+const sizeGroup = (id: string, withDefault = true): OptionGroup => ({
+  id: `${id}-size`,
+  name: { ar: "الحجم", en: "Size" },
+  type: "single",
+  required: true,
+  min: 1,
+  max: 1,
+  choices: [
+    { id: `${id}-s`, name: { ar: "صغير", en: "Small" }, price: 0, isDefault: withDefault },
+    { id: `${id}-m`, name: { ar: "وسط", en: "Medium" }, price: 1.5, isDefault: false },
+    { id: `${id}-l`, name: { ar: "كبير", en: "Large" }, price: 3, isDefault: false },
+  ],
+})
+
+const extrasGroup = (id: string): OptionGroup => ({
+  id: `${id}-extras`,
+  name: { ar: "إضافات", en: "Extras" },
+  type: "multiple",
+  required: false,
+  min: 0,
+  max: 3,
+  choices: [
+    { id: `${id}-cheese`, name: { ar: "جبنة زيادة", en: "Extra cheese" }, price: 1, isDefault: false },
+    { id: `${id}-bacon`, name: { ar: "لحم مقدد", en: "Bacon" }, price: 1.5, isDefault: false },
+    { id: `${id}-mushroom`, name: { ar: "فطر", en: "Mushrooms" }, price: 1, isDefault: false },
+    { id: `${id}-jalapeno`, name: { ar: "هالبينو", en: "Jalapeño" }, price: 0.5, isDefault: false },
+  ],
+})
+
+export const optionGroupsByProduct: Record<string, OptionGroup[]> = {
+  p1: [sizeGroup("p1"), extrasGroup("p1")],
+  p3: [sizeGroup("p3"), extrasGroup("p3")],
+  p4: [sizeGroup("p4", false), extrasGroup("p4")], // بدون اختيار افتراضي لتجربة التحقق
+}

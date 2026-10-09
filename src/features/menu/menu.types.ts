@@ -38,5 +38,22 @@ export type ProductsQuery = {
   page?: number
   limit?: number
 }
+export type OptionChoice = {
+  id: string
+  name: LocalizedText
+  price: number // الزيادة على سعر المنتج
+  isDefault: boolean
+}
 
+export type OptionGroup = {
+  id: string
+  name: LocalizedText
+  type: "single" | "multiple"
+  required: boolean
+  min: number
+  max: number | null
+  choices: OptionChoice[]
+}
+
+export type ProductDetail = Product & { optionGroups: OptionGroup[] }
 export type ProductsPage = { items: Product[]; total: number }

@@ -1,10 +1,8 @@
-import type { Theme } from "./theme.types"
+import { FONT_FAMILIES, loadFont } from "./fonts"
 import { generatePalette } from "./generatePalette"
-import { FONT_FAMILIES } from "./fonts"
+import type { Theme } from "./theme.types"
 
-export type Lang = "ar" | "en"
-
-export function applyTheme(theme: Theme, lang: Lang) {
+export function applyTheme(theme: Theme, lang: "ar" | "en") {
   const root = document.documentElement
   const { vars } = generatePalette(theme)
 
@@ -14,6 +12,9 @@ export function applyTheme(theme: Theme, lang: Lang) {
 
   root.classList.toggle("dark", theme.mode === "dark")
   root.style.colorScheme = theme.mode
+
+  loadFont(theme.fontAr)
+  loadFont(theme.fontEn)
 
   const main = lang === "ar" ? FONT_FAMILIES[theme.fontAr] : FONT_FAMILIES[theme.fontEn]
   const second = lang === "ar" ? FONT_FAMILIES[theme.fontEn] : FONT_FAMILIES[theme.fontAr]

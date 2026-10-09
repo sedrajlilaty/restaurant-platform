@@ -2,8 +2,7 @@ import { useEffect, type ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import axios from "axios"
-import { applyTheme } from "@/features/theme/applyTheme"
-import { DEFAULT_THEME } from "@/features/theme/presets"
+import { DEFAULT_THEME, applyTheme, resolveTheme, useModeStore } from "@/features/theme"
 import { useDirection } from "@/hooks/useDirection"
 import { setLanguage } from "@/lib/i18n"
 import { fetchTenant } from "./tenant.api"
@@ -12,6 +11,7 @@ import { TenantContext } from "./useTenant"
 export function TenantProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const { lang } = useDirection()
+  const override = useModeStore((s) => s.override)
 
   const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ["tenant"],
@@ -20,8 +20,14 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   })
 
   useEffect(() => {
-    applyTheme(data?.kind === "restaurant" ? data.theme : DEFAULT_THEME, lang)
-  }, [data, lang])
+    if (data?.kind === "restaurant") {
+      const resolved = resolveTheme(data.theme, data.features)
+      const canSwitch = data.features.includes("theme_dark_mode")
+      applyTheme({ ...resolved, mode: canSwitch && override ? override : resolved.mode }, lang)
+    } else {
+      applyTheme({ ...DEFAULT_THEME, mode: override ?? DEFAULT_THEME.mode }, lang)
+    }
+  }, [data, lang, override])
 
   useEffect(() => {
     if (data?.kind === "restaurant" && !localStorage.getItem("lang")) {

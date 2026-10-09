@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher"
 import { useAuth } from "@/features/auth/auth.store"
 import { cn } from "@/lib/utils"
-
+import { ModeToggle } from "@/features/tenant"
 const LINKS = [
   { to: "/super/restaurants", label: "nav.restaurants" },
   { to: "/super/plans", label: "nav.plans" },
@@ -22,7 +22,11 @@ export function SuperAdminLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3">
           <span className="font-bold">{t("layout.superPanel")}</span>
           <div className="flex items-center gap-1">
-            <LanguageSwitcher className="text-inherit hover:bg-white/10 hover:text-inherit" />
+            <div className="flex justify-end gap-1">
+  <ModeToggle />
+              <LanguageSwitcher className="text-inherit hover:bg-white/10 hover:text-inherit" />
+
+</div>
             <Button variant="ghost" size="sm" className="gap-1 text-inherit hover:bg-white/10 hover:text-inherit" onClick={logout}>
               <LogOut className="size-4" />
               <span className="hidden sm:inline">{t("common.logout")}</span>

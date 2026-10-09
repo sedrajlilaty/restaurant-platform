@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import type { Banner, Category, ProductsPage, ProductsQuery } from "./menu.types"
-
+import axios from "axios"
 async function fetchBanners() {
   const { data } = await api.get<Banner[]>("/public/banners")
   return data
@@ -26,4 +26,19 @@ export const useProducts = (params: ProductsQuery) =>
     queryKey: ["menu", "products", params],
     queryFn: () => fetchProducts(params),
     placeholderData: keepPreviousData,
+  })
+
+  import type { ProductDetail } from "./menu.types"
+
+async function fetchProduct(id: string) {
+  const { data } = await api.get<ProductDetail>(`/public/products/${id}`)
+  return data
+}
+
+export const useProduct = (id: string) =>
+  useQuery({
+    queryKey: ["menu", "product", id],
+    queryFn: () => fetchProduct(id),
+    enabled: id !== "",
+    retry: (count, error) => !(axios.isAxiosError(error) && error.response?.status === 404) && count < 1,
   })

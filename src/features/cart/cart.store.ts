@@ -1,13 +1,28 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
+import type { LocalizedText } from "@/types"
+
+export type CartOption = {
+  groupId: string
+  choiceId: string
+  groupName: LocalizedText
+  name: LocalizedText
+  price: number
+}
 
 export type CartItem = {
-  id: string // معرّف السطر: المنتج + الخيارات المختارة
+  id: string // المنتج + الخيارات + الملاحظة
   productId: string
-  name: { ar: string; en: string }
-  unitPrice: number
+  name: LocalizedText
+  imageUrl: string | null
+  unitPrice: number // السعر شامل الإضافات
   qty: number
+  options: CartOption[]
   notes?: string
+}
+
+export function buildLineId(productId: string, choiceIds: string[], notes = "") {
+  return [productId, [...choiceIds].sort().join(","), notes.trim().toLowerCase()].join("|")
 }
 
 type CartState = {
@@ -37,7 +52,12 @@ export const useCart = create<CartState>()(
       remove: (id) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
       clear: () => set({ items: [] }),
     }),
-    { name: "cart" },
+    {
+      name: "cart",
+      version: 2,
+      partialize: (s) => ({ items: s.items }),
+      migrate: () => ({ items: [] }),
+    },
   ),
 )
 

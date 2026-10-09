@@ -7,14 +7,11 @@ export type ThemePreset = {
 }
 
 export const PRESETS: ThemePreset[] = [
-    { key: "terracotta", label: { ar: "قرميدي", en: "Terracotta" }, colors: { primary: "#BF4E2C", accent: "#E9A04F" } },
-
-  { key: "berry", label: { ar: "عنابي وخوخي", en: "Berry & Peach" }, colors: { primary: "#8C2F4A", accent: "#F2A07B" } },
-  { key: "navy", label: { ar: "نيلي وقرميدي", en: "Navy & Terracotta" }, colors: { primary: "#1E3A5F", accent: "#C8482A" } },
-  { key: "ember", label: { ar: "فحمي وبرتقالي", en: "Charcoal & Orange" }, colors: { primary: "#C9481A", accent: "#2B2B2B" } },
-    { key: "cafe", label: { ar: "كافيه", en: "Café" }, colors: { primary: "#6B4226", accent: "#C98B5B" } },
+  { key: "terracotta", label: { ar: "قرميدي", en: "Terracotta" }, colors: { primary: "#BF4E2C", accent: "#E9A04F" } },
+  { key: "cafe", label: { ar: "كافيه", en: "Café" }, colors: { primary: "#6B4226", accent: "#C98B5B" } },
   { key: "fastfood", label: { ar: "وجبات سريعة", en: "Fast Food" }, colors: { primary: "#D62828", accent: "#FFB400" } },
 ]
+
 export const DEFAULT_THEME: Theme = {
   preset: "terracotta",
   mode: "light",

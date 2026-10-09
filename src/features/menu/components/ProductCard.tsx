@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { Check, Plus, Star, UtensilsCrossed } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { useCart } from "@/features/cart/cart.store"
+import { buildLineId, useCart } from "@/features/cart"
 import { useLocalized } from "@/hooks/useLocalized"
 import { usePrice } from "@/hooks/usePrice"
 import { cn } from "@/lib/utils"
@@ -27,7 +27,14 @@ export function ProductCard({ product }: { product: Product }) {
       navigate(`/product/${product.id}`)
       return
     }
-    add({ id: product.id, productId: product.id, name: product.name, unitPrice: product.price })
+        add({
+      id: buildLineId(product.id, []),
+      productId: product.id,
+      name: product.name,
+      imageUrl: product.imageUrl,
+      unitPrice: product.price,
+      options: [],
+    })
     setAdded(true)
   }
 
