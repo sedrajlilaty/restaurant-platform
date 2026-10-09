@@ -56,5 +56,22 @@
     "body": "Contact the platform team to upgrade your plan."
   },
   "notFound": { "title": "Page not found", "back": "Back to home" },
-  "placeholder": { "soon": "This page is under construction" }
+  "placeholder": { "soon": "This page is under construction" },
+  "menu": {
+  "searchPlaceholder": "Search for a dish...",
+  "popular": "Popular picks",
+  "all": "All",
+  "empty": "No products here yet",
+  "loadError": "Couldn't load the products",
+  "unavailable": "Unavailable",
+  "addToCart": "Add to cart",
+  "slide": "Slide {{n}}",
+  "badges": {
+    "bestseller": "Bestseller",
+    "chefs_pick": "Chef's pick",
+    "popular": "Popular",
+    "new": "New",
+    "hot": "Hot"
+  }
+}
 }

@@ -21,6 +21,7 @@ export type RestaurantTenant = {
   id: string
   name: { ar: string; en: string }
   defaultLang: "ar" | "en"
+  currency: string
   theme: Theme
   features: FeatureKey[]
   subscription: Subscription
