@@ -13,4 +13,4 @@ export function useRestaurant(): RestaurantTenant {
   const tenant = useTenant()
   if (tenant.kind !== "restaurant") throw new Error("This page needs a restaurant domain")
   return tenant
-}
+} 

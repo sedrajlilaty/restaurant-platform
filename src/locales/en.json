@@ -41,9 +41,13 @@
     "forbidden": "You don't have access to this page"
   },
   "validation": {
-    "email": "Enter a valid email",
-    "passwordMin": "Password must be at least 6 characters"
-  },
+  "email": "Enter a valid email",
+  "passwordMin": "Password must be at least 6 characters",
+  "required": "This field is required",
+  "tooLong": "The text is too long",
+  "phone": "Enter a valid phone number",
+  "addressRequired": "Enter the delivery address (at least 5 characters)"
+},
   "layout": { "superPanel": "Platform Admin" },
   "subscription": {
     "expiredTitle": "Service temporarily unavailable",
@@ -90,5 +94,56 @@
   "added": "Added",
   "notFound": "This product doesn't exist",
   "unavailable": "This product is currently unavailable"
-}
+},
+"cart": {
+  "title": "Cart",
+  "empty": "Your cart is empty",
+  "browse": "Browse the menu",
+  "subtotal": "Subtotal",
+  "checkout": "Checkout",
+  "remove": "Remove",
+  "note": "Note",
+  "feesNote": "Delivery fees and discounts (if any) are shown when you confirm the order"
+},
+"checkout": {
+  "title": "Checkout",
+  "orderType": "Order type",
+  "types": {
+    "dine_in": { "label": "Dine in", "desc": "At your table" },
+    "takeaway": { "label": "Takeaway", "desc": "Pick up from the restaurant" },
+    "delivery": { "label": "Delivery", "desc": "To your address" }
+  },
+  "table": "Table {{number}}",
+  "scanTable": "Scan the QR code on your table to order inside the restaurant",
+  "noTypes": "Ordering is not available right now",
+  "noPayment": "No payment method is available right now",
+  "details": "Your details",
+  "name": "Name",
+  "phone": "Phone number",
+  "address": "Address",
+  "addressPlaceholder": "Area, street, nearest landmark",
+  "note": "Order notes (optional)",
+  "payment": "Payment method",
+  "methods": { "cash": "Cash", "shamcash": "Sham Cash" },
+  "summary": "Order summary",
+  "deliveryNote": "A delivery fee may be added when you confirm the order",
+  "submit": "Confirm order",
+  "submitting": "Sending...",
+  "errors": { "submit": "Couldn't save the order, please try again" }
+},
+"orderSuccess": {
+  "title": "Your order is saved",
+  "number": "Order number",
+  "lastStep": "One last step",
+  "lastStepBody": "Tap the button to send the order to the restaurant on WhatsApp. The restaurant doesn't get the order until you send the message.",
+  "sendWhatsapp": "Send the order on WhatsApp",
+  "noWhatsapp": "The restaurant's WhatsApp number isn't available, please contact them directly",
+  "payShamcash": "Pay with Sham Cash",
+  "payHint": "After paying, let the restaurant know on WhatsApp",
+  "discount": "Discount",
+  "deliveryFee": "Delivery fee",
+  "total": "Total",
+  "back": "Back to the menu"
+},
+"table": { "invalid": "Invalid table code" }
 }

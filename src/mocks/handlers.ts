@@ -1,6 +1,11 @@
 import { delay, http, HttpResponse } from "msw"
-import { tenants } from "./data"
+import type { OrderPayload, PlacedOrder, PlacedOrderItem } from "@/features/checkout"
+import { storeSettings, tables, tenants } from "./data"
 import { banners, categories, optionGroupsByProduct, products } from "./menuData"
+
+const money = (value: number) => Math.round(value * 100) / 100
+let orderCounter = 1000
+
 export const handlers = [
   http.get("/api/public/restaurant", ({ request }) => {
     const host = new URL(request.url).searchParams.get("host") ?? ""
@@ -42,18 +47,83 @@ export const handlers = [
     let list = products
     if (categoryId) list = list.filter((p) => p.categoryId === categoryId)
     if (featured) list = list.filter((p) => p.featured)
-    if (q) {
-      list = list.filter((p) => `${p.name.ar} ${p.name.en}`.toLowerCase().includes(q))
-    }
+    if (q) list = list.filter((p) => `${p.name.ar} ${p.name.en}`.toLowerCase().includes(q))
 
     const items = list.slice((page - 1) * limit, page * limit).map(({ featured: _f, ...product }) => product)
     return HttpResponse.json({ items, total: list.length })
   }),
-    http.get("/api/public/products/:id", async ({ params }) => {
+
+  http.get("/api/public/products/:id", async ({ params }) => {
     await delay(300)
     const found = products.find((p) => p.id === params.id)
     if (!found) return HttpResponse.json({ message: "Not found" }, { status: 404 })
     const { featured: _featured, ...product } = found
     return HttpResponse.json({ ...product, optionGroups: optionGroupsByProduct[found.id] ?? [] })
+  }),
+
+  http.get("/api/public/settings", async () => {
+    await delay(200)
+    return HttpResponse.json(storeSettings)
+  }),
+
+  http.get("/api/public/tables/:token", async ({ params }) => {
+    await delay(200)
+    const number = tables[String(params.token)]
+    if (!number) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    return HttpResponse.json({ tableNumber: number })
+  }),
+
+  http.post("/api/public/orders", async ({ request }) => {
+    await delay(600)
+    const body = (await request.json()) as OrderPayload
+
+    const items: PlacedOrderItem[] = []
+    for (const line of body.items) {
+      const product = products.find((p) => p.id === line.productId)
+      if (!product) return HttpResponse.json({ message: "Unknown product" }, { status: 400 })
+
+      const choices = (optionGroupsByProduct[product.id] ?? []).flatMap((g) => g.choices)
+      const classify = line.classifyId ? choices.find((c) => c.id === line.classifyId) : undefined
+      const addons = line.addons.flatMap((a) => {
+        const choice = choices.find((c) => c.id === a.addonId)
+        return choice ? [{ name: choice.name, quantity: a.quantity, unitPrice: choice.price }] : []
+      })
+
+      const unitPrice = money(
+        product.price + (classify?.price ?? 0) + addons.reduce((sum, a) => sum + a.unitPrice * a.quantity, 0),
+      )
+      items.push({
+        productName: product.name,
+        classifyName: classify?.name ?? null,
+        quantity: line.quantity,
+        unitPrice,
+        lineTotal: money(unitPrice * line.quantity),
+        note: line.note ?? null,
+        addons,
+      })
+    }
+
+    const subtotal = money(items.reduce((sum, i) => sum + i.lineTotal, 0))
+    const deliveryFee = body.orderType === "delivery" ? 2 : 0
+
+    const order: PlacedOrder = {
+      id: crypto.randomUUID(),
+      orderNumber: String(++orderCounter),
+      orderType: body.orderType,
+      customerName: body.customerName,
+      customerPhone: body.customerPhone,
+      deliveryAddress: body.deliveryAddress ?? null,
+      tableNumber: body.tableToken ? (tables[body.tableToken] ?? null) : null,
+      paymentMethod: body.paymentMethod,
+      note: body.note ?? null,
+      currency: "USD",
+      subtotal,
+      discountAmount: 0,
+      deliveryFee,
+      total: money(subtotal + deliveryFee),
+      items,
+      createdAt: new Date().toISOString(),
+    }
+    return HttpResponse.json(order, { status: 201 })
   }),
 ]

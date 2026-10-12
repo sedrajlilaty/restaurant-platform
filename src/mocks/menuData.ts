@@ -1,4 +1,5 @@
 import type { Banner, Category, OptionGroup, Product } from "@/features/menu"
+import { CLASSIFY_GROUP_ID } from "@/lib/constants"
 export const banners: Banner[] = [
   {
     id: "b1",
@@ -52,7 +53,7 @@ export const products: MockProduct[] = [
   { ...base, id: "p11", categoryId: "c5", name: { ar: "كنافة بالجبنة", en: "Cheese Kunafa" }, description: { ar: "كنافة ناعمة بالجبنة والقطر", en: "Soft kunafa with cheese and syrup" }, price: 5.5, badge: null, rating: null, available: false, hasOptions: false, featured: false },
 ]
 const sizeGroup = (id: string, withDefault = true): OptionGroup => ({
-  id: `${id}-size`,
+   id: CLASSIFY_GROUP_ID,
   name: { ar: "الحجم", en: "Size" },
   type: "single",
   required: true,
