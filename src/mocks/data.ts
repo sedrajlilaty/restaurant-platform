@@ -1,6 +1,7 @@
 import type { FeatureKey, TenantConfig } from "@/features/tenant"
 import { DEFAULT_THEME, PRESETS } from "@/features/theme"
 import type { StoreSettings } from "@/features/tenant/tenant.types"
+import { tablesDb } from "./tablesData"
 const features: FeatureKey[] = [
   "analytics",
   "coupons",
@@ -58,13 +59,4 @@ export const storeSettings: StoreSettings = {
     { method: "cash", enabled: true, paymentLink: null },
     { method: "shamcash", enabled: true, paymentLink: "https://example.com/pay" },
   ],
-}
-
-// رموز طاولات تجريبية: /t/table-1 ... /t/table-5
-export const tables: Record<string, string> = {
-  "table-1": "1",
-  "table-2": "2",
-  "table-3": "3",
-  "table-4": "4",
-  "table-5": "5",
 }

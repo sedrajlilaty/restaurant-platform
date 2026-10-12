@@ -1,12 +1,14 @@
 import { delay, http, HttpResponse } from "msw"
 import type { OrderPayload, PlacedOrder, PlacedOrderItem } from "@/features/checkout"
-import { storeSettings, tables, tenants } from "./data"
+import { storeSettings, tenants } from "./data"
 import { banners, categories, optionGroupsByProduct, products } from "./menuData"
+import { tablesDb } from "./tablesData"
 
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000
 
 export const handlers = [
+  // المطعم حسب الدومين
   http.get("/api/public/restaurant", ({ request }) => {
     const host = new URL(request.url).searchParams.get("host") ?? ""
     const tenant = tenants[host]
@@ -14,6 +16,7 @@ export const handlers = [
     return HttpResponse.json(tenant)
   }),
 
+  // تسجيل الدخول
   http.post("/api/auth/login", async ({ request }) => {
     const { email, password } = (await request.json()) as { email: string; password: string }
     if (password === "123456" && email === "admin@demo.com") {
@@ -25,6 +28,7 @@ export const handlers = [
     return HttpResponse.json({ message: "Invalid credentials" }, { status: 401 })
   }),
 
+  // المنيو
   http.get("/api/public/banners", async () => {
     await delay(300)
     return HttpResponse.json(banners)
@@ -61,18 +65,21 @@ export const handlers = [
     return HttpResponse.json({ ...product, optionGroups: optionGroupsByProduct[found.id] ?? [] })
   }),
 
+  // إعدادات المطعم العامة
   http.get("/api/public/settings", async () => {
     await delay(200)
     return HttpResponse.json(storeSettings)
   }),
 
+  // الطاولة من رمز الـ QR
   http.get("/api/public/tables/:token", async ({ params }) => {
     await delay(200)
-    const number = tables[String(params.token)]
-    if (!number) return HttpResponse.json({ message: "Not found" }, { status: 404 })
-    return HttpResponse.json({ tableNumber: number })
+    const table = tablesDb.list.find((t) => t.qrToken === params.token && t.isActive)
+    if (!table) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    return HttpResponse.json({ tableNumber: table.tableNumber })
   }),
 
+  // إنشاء طلب
   http.post("/api/public/orders", async ({ request }) => {
     await delay(600)
     const body = (await request.json()) as OrderPayload
@@ -113,7 +120,7 @@ export const handlers = [
       customerName: body.customerName,
       customerPhone: body.customerPhone,
       deliveryAddress: body.deliveryAddress ?? null,
-      tableNumber: body.tableToken ? (tables[body.tableToken] ?? null) : null,
+      tableNumber: tablesDb.list.find((t) => t.qrToken === body.tableToken)?.tableNumber ?? null,
       paymentMethod: body.paymentMethod,
       note: body.note ?? null,
       currency: "USD",
@@ -125,5 +132,47 @@ export const handlers = [
       createdAt: new Date().toISOString(),
     }
     return HttpResponse.json(order, { status: 201 })
+  }),
+
+  // أدمن: الطاولات
+  http.get("/api/admin/tables", async () => {
+    await delay(300)
+    return HttpResponse.json(tablesDb.list)
+  }),
+
+  http.post("/api/admin/tables", async ({ request }) => {
+    await delay(400)
+    const { tableNumbers } = (await request.json()) as { tableNumbers: string[] }
+    const existing = new Set(tablesDb.list.map((t) => t.tableNumber))
+    const duplicated = new Set(tableNumbers).size !== tableNumbers.length || tableNumbers.some((n) => existing.has(n))
+    if (duplicated) return HttpResponse.json({ message: "Duplicate table number" }, { status: 409 })
+
+    const created = tableNumbers.map((tableNumber) => ({
+      id: crypto.randomUUID(),
+      tableNumber,
+      qrToken: `tbl-${crypto.randomUUID().slice(0, 8)}`,
+      isActive: true,
+    }))
+    tablesDb.list = [...tablesDb.list, ...created]
+    return HttpResponse.json(created, { status: 201 })
+  }),
+
+  http.patch("/api/admin/tables/:id", async ({ params, request }) => {
+    await delay(300)
+    const patch = (await request.json()) as { tableNumber?: string; isActive?: boolean }
+    const current = tablesDb.list.find((t) => t.id === params.id)
+    if (!current) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    if (patch.tableNumber && tablesDb.list.some((t) => t.id !== current.id && t.tableNumber === patch.tableNumber)) {
+      return HttpResponse.json({ message: "Duplicate table number" }, { status: 409 })
+    }
+    const updated = { ...current, ...patch }
+    tablesDb.list = tablesDb.list.map((t) => (t.id === current.id ? updated : t))
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete("/api/admin/tables/:id", async ({ params }) => {
+    await delay(300)
+    tablesDb.list = tablesDb.list.filter((t) => t.id !== params.id)
+    return new HttpResponse(null, { status: 204 })
   }),
 ]
