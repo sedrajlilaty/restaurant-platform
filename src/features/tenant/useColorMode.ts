@@ -6,9 +6,13 @@ export function useColorMode() {
   const override = useModeStore((s) => s.override)
   const setOverride = useModeStore((s) => s.setOverride)
 
-  const canSwitch = tenant.kind === "platform" || tenant.features.includes("theme_dark_mode")
+  // الافتراضي من القالب، واختيار الزائر (إن وجد) بيغلب عليه
   const base: ThemeMode = tenant.kind === "restaurant" ? resolveTheme(tenant.theme, tenant.features).mode : "light"
-  const mode: ThemeMode = canSwitch && override ? override : base
+  const mode: ThemeMode = override ?? base
 
-  return { mode, canSwitch, toggle: () => setOverride(mode === "dark" ? "light" : "dark") }
+  return {
+    mode,
+    canSwitch: true, // لقفلو على باقة: بدّليها بشرط من tenant.features
+    toggle: () => setOverride(mode === "dark" ? "light" : "dark"),
+  }
 }

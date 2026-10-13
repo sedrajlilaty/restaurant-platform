@@ -21,9 +21,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (data?.kind === "restaurant") {
-      const resolved = resolveTheme(data.theme, data.features)
-      const canSwitch = data.features.includes("theme_dark_mode")
-      applyTheme({ ...resolved, mode: canSwitch && override ? override : resolved.mode }, lang)
+      const theme = resolveTheme(data.theme, data.features)
+      applyTheme({ ...theme, mode: override ?? theme.mode }, lang)
     } else {
       applyTheme({ ...DEFAULT_THEME, mode: override ?? DEFAULT_THEME.mode }, lang)
     }

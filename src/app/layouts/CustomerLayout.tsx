@@ -40,7 +40,7 @@ export function CustomerLayout() {
           <div className={PAGE_CONTAINER}>
             <div className="flex items-center justify-between gap-3 rounded-3xl border bg-card/95 px-4 py-2.5 shadow-sm backdrop-blur">
               <Link to="/" className="flex min-w-0 items-center gap-3">
-                <RestaurantLogo name={name} logoUrl={restaurant.theme.logoUrl} />
+                <RestaurantLogo name={name} logoUrl={restaurant.logoUrl} />
                 <span className="truncate text-lg font-bold">{name}</span>
               </Link>
 

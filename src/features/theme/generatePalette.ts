@@ -1,15 +1,10 @@
 import { colord, extend } from "colord"
 import a11yPlugin from "colord/plugins/a11y"
-import type { Theme, ThemeRadius } from "./theme.types"
+import type { Theme } from "./theme.types"
 
 extend([a11yPlugin])
 
-const RADIUS: Record<ThemeRadius, string> = {
-  sm: "0.5rem",
-  md: "0.75rem",
-  lg: "1rem",
-  xl: "1.5rem",
-}
+const RADIUS = "1rem"
 
 function readableOn(bg: string) {
   const c = colord(bg)
@@ -60,7 +55,7 @@ export function generatePalette(theme: Theme) {
     "--border": border,
     "--input": border,
     "--ring": primary,
-    "--radius": RADIUS[theme.radius],
+    "--radius": RADIUS,
 
     "--brand-accent": brandAccent,
     "--brand-accent-foreground": readableOn(brandAccent),

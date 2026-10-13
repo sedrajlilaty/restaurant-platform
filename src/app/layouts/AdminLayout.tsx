@@ -139,7 +139,7 @@ export function AdminLayout() {
   const [open, setOpen] = useState(false)
 
   const name = restaurant.name[lang]
-  const logoUrl = restaurant.theme.logoUrl
+  const logoUrl = restaurant.logoUrl
   const daysLeft = differenceInCalendarDays(new Date(restaurant.subscription.endsAt), new Date())
 
   const bottomItems: BottomNavItem[] = [

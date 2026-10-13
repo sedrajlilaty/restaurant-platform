@@ -7,11 +7,11 @@ import { ColorField } from "../../components/shared/ColorField"
 import { useRestaurant } from "../../features/tenant/useTenant"
 import { applyTheme } from "../../features/theme/applyTheme"
 import { generatePalette } from "../../features/theme/generatePalette"
-import { PRESETS } from "../../features/theme/presets"
-import type { Theme, ThemeRadius } from "../../features/theme/theme.types"
+import { useModeStore } from "../../features/theme/mode.store"
+import { SAMPLE_THEMES } from "../../features/theme/presets"
+import { resolveTheme } from "../../features/theme/resolveTheme"
+import type { Theme } from "../../features/theme/theme.types"
 import { cn } from "../../lib/utils"
-
-const RADII: ThemeRadius[] = ["sm", "md", "lg", "xl"]
 
 export function ThemeDemoPage() {
   const { i18n } = useTranslation()
@@ -30,11 +30,14 @@ export function ThemeDemoPage() {
 
   // عند الخروج من الصفحة بنرجّع الثيم المحفوظ
   useEffect(() => {
-    return () => applyTheme(restaurant.theme, lang)
-  }, [restaurant.theme, lang])
+    return () => {
+      const saved = resolveTheme(restaurant.theme, restaurant.features)
+      applyTheme({ ...saved, mode: useModeStore.getState().override ?? saved.mode }, lang)
+    }
+  }, [restaurant.theme, restaurant.features, lang])
 
   const setColors = (patch: Partial<Theme["colors"]>) =>
-    setDraft((d) => ({ ...d, preset: null, colors: { ...d.colors, ...patch } }))
+    setDraft((d) => ({ ...d, id: "custom", isCustom: true, colors: { ...d.colors, ...patch } }))
 
   const samples = [
     { badge: tx("الأكثر مبيعاً", "Bestseller"), name: tx("برغر لحم كلاسيك", "Classic Beef Burger"), price: "$8.50", old: null },
@@ -43,22 +46,22 @@ export function ThemeDemoPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold">{tx("تجربة اختيار الألوان", "Color picker demo")}</h1>
+      <h1 className="text-xl font-bold">{tx("تجربة الثيم", "Theme demo")}</h1>
 
       <section className="space-y-4 rounded-3xl border bg-card p-4 shadow-sm">
         <div className="flex flex-wrap gap-2">
-          {PRESETS.map((preset) => (
+          {SAMPLE_THEMES.map((theme) => (
             <button
-              key={preset.key}
+              key={theme.id}
               type="button"
-              onClick={() => setDraft((d) => ({ ...d, preset: preset.key, colors: preset.colors }))}
+              onClick={() => setDraft(theme)}
               className={cn(
                 "flex items-center gap-2 rounded-full border px-4 py-2 text-sm",
-                draft.preset === preset.key && "border-primary bg-muted font-semibold",
+                draft.id === theme.id && "border-primary bg-muted font-semibold",
               )}
             >
-              <span className="size-4 rounded-full" style={{ backgroundColor: preset.colors.primary }} />
-              {preset.label[lang]}
+              <span className="size-4 rounded-full" style={{ backgroundColor: theme.colors.primary }} />
+              {theme.name[lang]}
             </button>
           ))}
         </div>
@@ -85,26 +88,13 @@ export function ThemeDemoPage() {
           </p>
         )}
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setDraft((d) => ({ ...d, mode: d.mode === "light" ? "dark" : "light" }))}
-          >
-            {draft.mode === "light" ? tx("الوضع الداكن", "Dark mode") : tx("الوضع الفاتح", "Light mode")}
-          </Button>
-          {RADII.map((r) => (
-            <Button
-              key={r}
-              type="button"
-              size="sm"
-              variant={draft.radius === r ? "default" : "outline"}
-              onClick={() => setDraft((d) => ({ ...d, radius: r }))}
-            >
-              {r}
-            </Button>
-          ))}
-        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setDraft((d) => ({ ...d, mode: d.mode === "light" ? "dark" : "light" }))}
+        >
+          {draft.mode === "light" ? tx("الوضع الداكن", "Dark mode") : tx("الوضع الفاتح", "Light mode")}
+        </Button>
       </section>
 
       <section className="space-y-4">

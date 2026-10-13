@@ -1,48 +1,85 @@
-import type { FeatureKey, TenantConfig } from "@/features/tenant"
-import { DEFAULT_THEME, PRESETS } from "@/features/theme"
-import type { StoreSettings } from "@/features/tenant/tenant.types"
-import { tablesDb } from "./tablesData"
+import type { FeatureKey, StoreSettings, TenantConfig } from "@/features/tenant"
+import { SAMPLE_THEMES, type Theme } from "@/features/theme"
+
 const features: FeatureKey[] = [
   "analytics",
   "coupons",
   "banners",
   "tables_qr",
   "delivery_zones",
-  "theme_custom_colors",
-  "theme_radius",
-  "theme_fonts",
-  "theme_dark_mode",
-  "theme_cover",
+  "custom_theme",
 ]
 const endsAt = new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString()
+const subscription = { status: "active", endsAt } as const
+
+// قالب أنشأه المطعم بنفسو
+const customTheme: Theme = {
+  id: "custom-r3",
+  name: { ar: "ثيم المطعم", en: "Restaurant theme" },
+  mode: "light",
+  colors: { primary: "#1E3A5F", accent: "#C8482A" },
+  fontAr: "cairo",
+  fontEn: "poppins",
+  previewImageUrl: null,
+  isCustom: true,
+}
 
 export const tenants: Record<string, TenantConfig> = {
+  // مطعم بالقالب الافتراضي وأغلب الميزات
   localhost: {
     kind: "restaurant",
     id: "r1",
     name: { ar: "مطعم تجريبي", en: "Demo Restaurant" },
     defaultLang: "ar",
     currency: "USD",
-    theme: DEFAULT_THEME,
+    logoUrl: null,
+    coverUrl: null,
+    theme: SAMPLE_THEMES[0],
     features,
-    subscription: { status: "active", endsAt },
+    subscription,
   },
+  // باقة صغيرة، قالب كافيه، لغة إنكليزية
   "cafe.localhost": {
     kind: "restaurant",
     id: "r2",
     name: { ar: "كافيه الصباح", en: "Morning Café" },
     defaultLang: "en",
     currency: "USD",
-    theme: {
-      ...DEFAULT_THEME,
-      preset: "cafe",
-      colors: PRESETS.find((p) => p.key === "cafe")?.colors ?? DEFAULT_THEME.colors,
-    },
+    logoUrl: null,
+    coverUrl: null,
+    theme: SAMPLE_THEMES[1],
     features: ["coupons", "banners"],
-    subscription: { status: "active", endsAt },
+    subscription,
+  },
+  // باقتو فيها قالب خاص ومستخدمو
+  "custom.localhost": {
+    kind: "restaurant",
+    id: "r3",
+    name: { ar: "البيت الأزرق", en: "Blue House" },
+    defaultLang: "ar",
+    currency: "USD",
+    logoUrl: null,
+    coverUrl: null,
+    theme: customTheme,
+    features: ["custom_theme"],
+    subscription,
+  },
+  // نفس القالب الخاص بس الباقة نزلت: لازم يرجع للثيم الافتراضي
+  "downgraded.localhost": {
+    kind: "restaurant",
+    id: "r4",
+    name: { ar: "مطعم نزلت باقتو", en: "Downgraded Plan" },
+    defaultLang: "ar",
+    currency: "USD",
+    logoUrl: null,
+    coverUrl: null,
+    theme: customTheme,
+    features: [],
+    subscription,
   },
   "platform.localhost": { kind: "platform" },
 }
+
 export const storeSettings: StoreSettings = {
   description: { ar: "مطعم تجريبي", en: "A demo restaurant" },
   phoneNumber: "0911111111",
