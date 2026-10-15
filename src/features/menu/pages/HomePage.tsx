@@ -4,25 +4,21 @@ import { Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Input } from "@/components/ui/input"
-import { useLocalized } from "@/hooks/useLocalized"
-import { useBanners, useCategories, useProducts } from "../menu.api"
 import { BannerSlider } from "../components/BannerSlider"
 import { CategoryTabs } from "../components/CategoryTabs"
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard"
+import { useBanners, useCategories, useProducts } from "../menu.api"
+
+const GRID = "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 
 export function HomePage() {
   const { t } = useTranslation()
-  const l = useLocalized()
   const navigate = useNavigate()
-  const [categoryId, setCategoryId] = useState<string | null>(null)
   const [query, setQuery] = useState("")
 
   const banners = useBanners()
   const categories = useCategories()
-  const products = useProducts(categoryId ? { categoryId, limit: 20 } : { featured: true, limit: 12 })
-
-  const selectedCategory = categories.data?.find((c) => c.id === categoryId)
-  const title = selectedCategory ? l(selectedCategory.name) : t("menu.popular")
+  const products = useProducts({ limit: 12 })
 
   function submitSearch(e: FormEvent) {
     e.preventDefault()
@@ -50,14 +46,20 @@ export function HomePage() {
       )}
 
       {categories.data && (
-        <CategoryTabs categories={categories.data} selectedId={categoryId} onSelect={setCategoryId} />
+        <CategoryTabs
+          categories={categories.data}
+          selectedId={null}
+          onSelect={(id) => {
+            if (id) navigate(`/category/${id}`)
+          }}
+        />
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold">{title}</h2>
+        <h2 className="text-lg font-bold">{t("menu.popular")}</h2>
 
         {products.isPending ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          <div className={GRID}>
             {Array.from({ length: 4 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
             ))}
@@ -67,7 +69,7 @@ export function HomePage() {
         ) : products.data.items.length === 0 ? (
           <EmptyState title={t("menu.empty")} />
         ) : (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div className={GRID}>
             {products.data.items.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
