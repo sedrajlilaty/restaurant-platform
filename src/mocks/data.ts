@@ -85,8 +85,14 @@ export const storeSettings: StoreSettings = {
   phoneNumber: "0911111111",
   whatsappNumber: "0911111111",
   address: { ar: "دمشق", en: "Damascus" },
-  workingHours: [],
-  socialLinks: [],
+    workingHours: [
+    ...[0, 1, 2, 3, 4, 6].map((dayOfWeek) => ({ dayOfWeek, openTime: "10:00", closeTime: "23:00" })),
+    { dayOfWeek: 5, openTime: "14:00", closeTime: "02:00" }, // الجمعة: بيسكّر بعد منتصف الليل
+  ],
+  socialLinks: [
+    { platform: "instagram", url: "https://instagram.com/demo" },
+    { platform: "facebook", url: "https://facebook.com/demo" },
+  ],
   orderTypes: [
     { type: "dine_in", enabled: true },
     { type: "takeaway", enabled: true },

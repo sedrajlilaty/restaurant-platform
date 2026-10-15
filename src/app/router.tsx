@@ -10,10 +10,10 @@ import { SuperAdminLayout } from "./layouts/SuperAdminLayout"
 import { RequireAuth } from "./guards/RequireAuth"
 import { RequireFeature } from "./guards/RequireFeature"
 import { ThemeDemoPage } from "../app/dev/ThemeDemoPage"
-import { HomePage, ProductPage } from "@/features/menu"// مؤقت: كل صفحة بنبنيها بنبدّل سطرها بالصفحة الحقيقية
 import { CartPage } from "@/features/cart"
 import { CheckoutPage, OrderSuccessPage, TableEntryPage } from "@/features/checkout"
 import { TablesPage, TablesPrintPage } from "@/features/admin"
+import { AboutPage, CategoryPage, HomePage, ProductPage, SearchPage } from "@/features/menu"
 const page = (titleKey: string): ReactNode => <PlaceholderPage titleKey={titleKey} />
 const gated = (feature: FeatureKey, titleKey: string): ReactNode => (
   <RequireFeature feature={feature}>{page(titleKey)}</RequireFeature>
@@ -26,9 +26,9 @@ export const restaurantRouter = createBrowserRouter([
     children: [
       // { index: true, element: page("nav.home") },
       { index: true, element: <HomePage /> },
-      { path: "category/:id", element: page("nav.category") },
-{ path: "product/:id", element: <ProductPage /> },      { path: "search", element: page("nav.search") },
-      { path: "about", element: page("nav.about") },
+ { path: "category/:id", element: <CategoryPage /> },{ path: "product/:id", element: <ProductPage /> }, 
+      { path: "search", element: <SearchPage /> },
+      { path: "about", element: <AboutPage /> },
      { path: "cart", element: <CartPage /> },
 { path: "checkout", element: <CheckoutPage /> },
 { path: "order-success", element: <OrderSuccessPage /> },

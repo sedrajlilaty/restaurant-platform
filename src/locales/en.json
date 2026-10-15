@@ -221,5 +221,30 @@
       "tooMany": "Up to 100 tables at a time",
       "generic": "Something went wrong, please try again"
     }
+  }, "catalog": {
+    "loadMore": "Show more",
+    "loadingMore": "Loading..."
+  },
+  "category": {
+    "notFound": "This category doesn't exist",
+    "backHome": "Back to home"
+  },
+  "search": {
+    "placeholder": "Search for a dish...",
+    "hint": "Type a dish name to start searching",
+    "noResults": "No results for \"{{q}}\"",
+    "clear": "Clear"
+  },
+  "about": {
+    "openNow": "Open now",
+    "closedNow": "Closed now",
+    "contact": "Contact",
+    "whatsapp": "WhatsApp",
+    "address": "Address",
+    "openMap": "Open in maps",
+    "hours": "Opening hours",
+    "closed": "Closed",
+    "social": "Follow us",
+    "empty": "No information available yet"
   }
 }

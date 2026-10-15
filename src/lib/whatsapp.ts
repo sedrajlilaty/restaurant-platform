@@ -6,6 +6,7 @@ export function toWhatsappNumber(raw: string) {
   return digits
 }
 
-export function whatsappLink(number: string, text: string) {
-  return `https://wa.me/${toWhatsappNumber(number)}?text=${encodeURIComponent(text)}`
+export function whatsappLink(number: string, text = "") {
+  const base = `https://wa.me/${toWhatsappNumber(number)}`
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base
 }
