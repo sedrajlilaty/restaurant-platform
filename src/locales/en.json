@@ -246,5 +246,47 @@
     "closed": "Closed",
     "social": "Follow us",
     "empty": "No information available yet"
+  },
+    "categories": {
+    "title": "Categories",
+    "subtitle": "Arrange your menu categories. Drag a category to move it.",
+    "add": "Add category",
+    "empty": "No categories yet",
+    "emptyHint": "Add your first category to start building the menu",
+    "active": "Visible",
+    "hidden": "Hidden",
+    "drag": "Drag to reorder",
+    "form": {
+      "addTitle": "Add category",
+      "editTitle": "Edit category",
+      "nameAr": "Arabic name",
+      "nameEn": "English name",
+      "image": "Image",
+      "visible": "Visible to customers"
+    },
+    "delete": {
+      "title": "Delete this category?",
+      "desc": "The category \"{{name}}\" will be deleted."
+    },
+    "toast": {
+      "added": "Added",
+      "updated": "Saved",
+      "deleted": "Deleted"
+    },
+    "errors": {
+      "generic": "Something went wrong, please try again",
+      "hasProducts": "A category with products can't be deleted. Move or delete its products first."
+    }
+  },
+  "upload": {
+    "choose": "Choose an image",
+    "change": "Change image",
+    "remove": "Remove image",
+    "hint": "JPG, PNG or WebP, up to 2 MB",
+    "errors": {
+      "type": "This file type isn't supported",
+      "size": "The image is larger than 2 MB",
+      "failed": "Couldn't upload the image"
+    }
   }
 }

@@ -12,7 +12,7 @@ import { RequireFeature } from "./guards/RequireFeature"
 import { ThemeDemoPage } from "../app/dev/ThemeDemoPage"
 import { CartPage } from "@/features/cart"
 import { CheckoutPage, OrderSuccessPage, TableEntryPage } from "@/features/checkout"
-import { TablesPage, TablesPrintPage } from "@/features/admin"
+import { CategoriesPage, TablesPage, TablesPrintPage } from "@/features/admin"
 import { AboutPage, CategoryPage, HomePage, ProductPage, SearchPage } from "@/features/menu"
 const page = (titleKey: string): ReactNode => <PlaceholderPage titleKey={titleKey} />
 const gated = (feature: FeatureKey, titleKey: string): ReactNode => (
@@ -56,8 +56,7 @@ export const restaurantRouter = createBrowserRouter([
     ),
     children: [
       { index: true, element: page("nav.home") },
-      { path: "categories", element: page("nav.categories") },
-      { path: "products", element: page("nav.products") },
+      { path: "categories", element: <CategoriesPage /> },      { path: "products", element: page("nav.products") },
       { path: "options", element: page("nav.options") },
       { path: "coupons", element: gated("coupons", "nav.coupons") },
       { path: "banners", element: gated("banners", "nav.banners") },
