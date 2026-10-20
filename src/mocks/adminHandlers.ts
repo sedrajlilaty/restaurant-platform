@@ -1,9 +1,9 @@
 import { delay, http, HttpResponse } from "msw"
-import type { AdminCategory } from "@/features/admin"
+import type { AdminCategory,AdminSettings } from "@/features/admin"
 import { categoriesDb } from "./categoriesData"
 import { products } from "./menuData"
 import { tablesDb } from "./tablesData"
-
+import { settingsDb } from "./settingsData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 
 export const adminHandlers = [
@@ -100,6 +100,28 @@ export const adminHandlers = [
       return HttpResponse.json({ code: "HAS_PRODUCTS" }, { status: 409 })
     }
     categoriesDb.list = categoriesDb.list.filter((c) => c.id !== params.id)
+    return new HttpResponse(null, { status: 204 })
+  }),
+    // الإعدادات
+  http.get("/api/admin/settings", async () => {
+    await delay(300)
+    return HttpResponse.json(settingsDb.value)
+  }),
+
+  http.put("/api/admin/settings/:section", async ({ params, request }) => {
+    await delay(400)
+    const body = await request.json()
+    const current = settingsDb.value
+    const apply: Record<string, () => AdminSettings> = {
+      info: () => ({ ...current, info: body as AdminSettings["info"] }),
+      "order-types": () => ({ ...current, orderTypes: body as AdminSettings["orderTypes"] }),
+      "payment-methods": () => ({ ...current, paymentMethods: body as AdminSettings["paymentMethods"] }),
+      "working-hours": () => ({ ...current, workingHours: body as AdminSettings["workingHours"] }),
+      "social-links": () => ({ ...current, socialLinks: body as AdminSettings["socialLinks"] }),
+    }
+    const update = apply[String(params.section)]
+    if (!update) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    settingsDb.value = update()
     return new HttpResponse(null, { status: 204 })
   }),
 ]

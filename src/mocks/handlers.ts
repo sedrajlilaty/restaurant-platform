@@ -2,18 +2,29 @@ import { delay, http, HttpResponse } from "msw"
 import type { OrderPayload, PlacedOrder, PlacedOrderItem } from "@/features/checkout"
 import { adminHandlers } from "./adminHandlers"
 import { categoriesDb } from "./categoriesData"
-import { storeSettings, tenants } from "./data"
+import {  tenants } from "./data"
 import { banners, optionGroupsByProduct, products } from "./menuData"
 import { tablesDb } from "./tablesData"
+import type { StoreSettings } from "@/features/tenant"
+import { settingsDb } from "./settingsData"
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000
 
 export const handlers = [
   // المطعم حسب الدومين
-  http.get("/api/public/restaurant", ({ request }) => {
+   http.get("/api/public/restaurant", ({ request }) => {
     const host = new URL(request.url).searchParams.get("host") ?? ""
     const tenant = tenants[host]
     if (!tenant) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    if (tenant.kind === "restaurant" && tenant.id === "r1") {
+      const { info } = settingsDb.value
+      return HttpResponse.json({
+        ...tenant,
+        logoUrl: info.logoUrl,
+        coverUrl: info.coverUrl,
+        defaultLang: info.defaultLang,
+      })
+    }
     return HttpResponse.json(tenant)
   }),
 
@@ -71,9 +82,20 @@ export const handlers = [
   }),
 
   // إعدادات المطعم العامة
-  http.get("/api/public/settings", async () => {
+   http.get("/api/public/settings", async () => {
     await delay(200)
-    return HttpResponse.json(storeSettings)
+    const s = settingsDb.value
+    const settings: StoreSettings = {
+      description: s.info.description,
+      phoneNumber: s.info.phoneNumber || null,
+      whatsappNumber: s.info.whatsappNumber || null,
+      address: s.info.address,
+      workingHours: s.workingHours,
+      socialLinks: s.socialLinks,
+      orderTypes: s.orderTypes,
+      paymentMethods: s.paymentMethods,
+    }
+    return HttpResponse.json(settings)
   }),
 
   // الطاولة من رمز الـ QR

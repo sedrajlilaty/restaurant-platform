@@ -288,5 +288,78 @@
       "size": "The image is larger than 2 MB",
       "failed": "Couldn't upload the image"
     }
+  },
+    "settings": {
+    "title": "Settings",
+    "subtitle": "Your restaurant info, order types, payment and opening hours.",
+    "save": "Save changes",
+    "saved": "Settings saved",
+    "saveError": "Couldn't save the settings, please try again",
+    "tabs": {
+      "info": "Info",
+      "orderTypes": "Order types",
+      "payment": "Payment",
+      "hours": "Opening hours",
+      "social": "Social media"
+    },
+    "errors": {
+      "url": "Enter a valid link starting with https://"
+    },
+    "info": {
+      "title": "Restaurant info",
+      "desc": "Shown on the About page and in the site header.",
+      "logo": "Logo",
+      "cover": "Cover image",
+      "coverHint": "A wide image shown at the top of the About page",
+      "descriptionAr": "Arabic description",
+      "descriptionEn": "English description",
+      "addressAr": "Arabic address",
+      "addressEn": "English address",
+      "phone": "Phone number",
+      "whatsapp": "WhatsApp number",
+      "whatsappHint": "Orders reach you on this number. Use 09xxxxxxxx or an international format.",
+      "language": "Default site language",
+      "langAr": "العربية",
+      "langEn": "English"
+    },
+    "orderTypes": {
+      "title": "Order types",
+      "desc": "Choose which types you accept from customers.",
+      "atLeastOne": "Enable at least one order type",
+      "hint": {
+        "dine_in": "The customer scans the table QR and orders",
+        "takeaway": "The customer picks the order up at the restaurant",
+        "delivery": "Delivery to the customer's address"
+      }
+    },
+    "payment": {
+      "title": "Payment methods",
+      "desc": "The methods shown to the customer at checkout.",
+      "cashHint": "Pay on receipt",
+      "shamcashHint": "The customer pays through your account link",
+      "link": "Payment link",
+      "linkHint": "An https link to your Sham Cash account",
+      "atLeastOne": "Enable at least one payment method"
+    },
+    "hours": {
+      "title": "Opening hours",
+      "desc": "A closed day shows as \"Closed\". You can add up to 3 slots per day.",
+      "open": "Open",
+      "closed": "Closed",
+      "from": "From",
+      "to": "To",
+      "addSlot": "Add slot",
+      "removeSlot": "Remove slot",
+      "overnight": "If the closing time is earlier than the opening time, the restaurant closes after midnight.",
+      "errors": {
+        "invalid": "Enter a valid time",
+        "same": "Opening and closing times can't be the same",
+        "overlap": "Two slots overlap"
+      }
+    },
+    "social": {
+      "title": "Social accounts",
+      "desc": "Shown on the About page. Leave a field empty to hide it."
+    }
   }
 }
