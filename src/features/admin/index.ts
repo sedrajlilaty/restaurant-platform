@@ -1,5 +1,9 @@
 export { CategoriesPage } from "./categories/CategoriesPage"
 export type { AdminCategory } from "./categories/categories.types"
+export { DashboardPage } from "./dashboard/DashboardPage"
 export { TablesPage } from "./tables/TablesPage"
 export { TablesPrintPage } from "./tables/TablesPrintPage"
 export type { Table } from "./tables/tables.types"
+
+export { SettingsPage } from "./settings/SettingsPage"
+export type { AdminSettings } from "./settings/settings.types"

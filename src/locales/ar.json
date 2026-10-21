@@ -325,5 +325,39 @@
       "title": "حسابات التواصل",
       "desc": "بتظهر بصفحة «عن المطعم». اترك الحقل فاضي لإخفائه."
     }
+  },
+    "dashboard": {
+    "welcome": "مرحباً، {{name}}",
+    "subtitle": "نظرة سريعة على {{restaurant}}",
+    "error": "تعذر تحميل البيانات",
+    "stats": {
+      "categories": "التصنيفات",
+      "products": "المنتجات",
+      "tables": "الطاولات",
+      "ordersToday": "طلبات اليوم"
+    },
+    "subscription": {
+      "title": "الاشتراك",
+      "daysLeft": "ينتهي بعد {{count}} يوم",
+      "endsToday": "ينتهي اليوم",
+      "expired": "منتهي",
+      "until": "حتى {{date}}",
+      "renewHint": "تواصل مع إدارة المنصة للتجديد"
+    },
+    "setup": {
+      "title": "خطوات الانطلاق",
+      "progress": "{{done}} من {{total}}",
+      "categories": "أضف تصنيفات القائمة",
+      "products": "أضف منتجاتك",
+      "tables": "أضف طاولاتك وولّد رموز QR"
+    },
+    "actions": {
+      "title": "وصول سريع",
+      "addCategory": "إضافة تصنيف",
+      "tables": "إدارة الطاولات",
+      "printTables": "طباعة ملصقات الطاولات",
+      "settings": "الإعدادات",
+      "viewSite": "عرض الموقع"
+    }
   }
 }

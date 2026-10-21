@@ -4,6 +4,7 @@ import { categoriesDb } from "./categoriesData"
 import { products } from "./menuData"
 import { tablesDb } from "./tablesData"
 import { settingsDb } from "./settingsData"
+import { ordersDb } from "./ordersData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 
 export const adminHandlers = [
@@ -123,5 +124,16 @@ export const adminHandlers = [
     if (!update) return HttpResponse.json({ message: "Not found" }, { status: 404 })
     settingsDb.value = update()
     return new HttpResponse(null, { status: 204 })
+  }),
+    // رئيسية الأدمن
+  http.get("/api/admin/dashboard", async () => {
+    await delay(300)
+    const today = new Date().toDateString()
+    return HttpResponse.json({
+      categories: categoriesDb.list.length,
+      products: products.length,
+      tables: tablesDb.list.length,
+      ordersToday: ordersDb.list.filter((order) => new Date(order.createdAt).toDateString() === today).length,
+    })
   }),
 ]
