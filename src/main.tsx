@@ -9,7 +9,7 @@ installAuthInterceptor()
 async function enableMocks() {
   if (import.meta.env.VITE_USE_MOCKS !== "true") return
   const { worker } = await import("@/mocks/browser")
-  await worker.start({ onUnhandledRequest: "bypass" })
+    await worker.start()
 }
 
 void enableMocks().then(() => {

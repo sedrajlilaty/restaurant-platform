@@ -1,7 +1,6 @@
 import type { FeatureKey, TenantConfig } from "@/features/tenant"
 import { SAMPLE_THEMES, type Theme } from "@/features/theme"
 import type { StoreSettings } from "@/features/tenant"
-import { settingsDb } from "./settingsData"
 const features: FeatureKey[] = [
   "analytics",
   "coupons",

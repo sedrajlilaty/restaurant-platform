@@ -359,5 +359,11 @@
       "settings": "الإعدادات",
       "viewSite": "عرض الموقع"
     }
+  },
+    "navGroups": {
+    "menu": "القائمة",
+    "marketing": "التسويق",
+    "operations": "التشغيل",
+    "store": "المتجر"
   }
 }

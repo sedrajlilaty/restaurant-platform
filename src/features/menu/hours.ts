@@ -1,5 +1,5 @@
 import type { StoreSettings } from "@/features/tenant"
-import type { Lang } from "@/types"
+import type { Lang } from "@/lib/i18n"
 
 export type WorkingHour = StoreSettings["workingHours"][number]
 

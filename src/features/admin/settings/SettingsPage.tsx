@@ -29,8 +29,7 @@ export function SettingsPage() {
       ) : query.isError ? (
         <EmptyState title={t("settings.saveError")} />
       ) : (
-        <Tabs defaultValue="info" dir={dir} className="space-y-4">
-          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-3xl p-1">
+        <Tabs defaultValue="info" dir={dir} className="flex flex-col gap-4">          <TabsList className="h-auto w-full flex-wrap justify-start gap-1 rounded-3xl p-1">
             {TABS.map((tab) => (
               <TabsTrigger key={tab} value={tab} className="rounded-full px-4 py-2">
                 {t(`settings.tabs.${tab}`)}
