@@ -7,3 +7,4 @@ export type { Table } from "./tables/tables.types"
 
 export { SettingsPage } from "./settings/SettingsPage"
 export type { AdminSettings } from "./settings/settings.types"
+export { AppearancePage } from "./appearance"

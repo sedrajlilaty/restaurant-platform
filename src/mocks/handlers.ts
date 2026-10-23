@@ -8,6 +8,7 @@ import { tablesDb } from "./tablesData"
 import type { StoreSettings } from "@/features/tenant"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
+import { chooseTheme, customThemes } from "./appearanceData"
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000
 
@@ -162,6 +163,7 @@ export const handlers = [
         ordersDb.list = [...ordersDb.list, { id: order.id, createdAt: order.createdAt }]
     return HttpResponse.json(order, { status: 201 })
   }),
+ 
   ...adminHandlers,
     // رئيسية الأدمن
   

@@ -5,6 +5,7 @@ import { products } from "./menuData"
 import { tablesDb } from "./tablesData"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
+import { chooseTheme, customThemes, presetThemes } from "./appearanceData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 
 export const adminHandlers = [
@@ -136,4 +137,36 @@ export const adminHandlers = [
       ordersToday: ordersDb.list.filter((order) => new Date(order.createdAt).toDateString() === today).length,
     })
   }),
+    // المظهر
+  http.get("/api/admin/themes", async ({ request }) => {
+    await delay(300)
+    const host = request.headers.get("X-Tenant-Host") ?? ""
+    return HttpResponse.json({ presets: presetThemes, custom: customThemes[host] ?? null })
+  }),
+
+  http.put("/api/admin/appearance", async ({ request }) => {
+    await delay(400)
+    const host = request.headers.get("X-Tenant-Host") ?? ""
+    const { themeId } = (await request.json()) as { themeId: string }
+    const result = chooseTheme(host, themeId)
+    if (result === "not_found") return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    if (result === "forbidden") return HttpResponse.json({ message: "Plan does not allow it" }, { status: 403 })
+    return new HttpResponse(null, { status: 204 })
+  }),
+   http.get("/api/admin/themes", async ({ request }) => {
+    await delay(300)
+    const host = request.headers.get("X-Tenant-Host") ?? ""
+    return HttpResponse.json({ presets: presetThemes, custom: customThemes[host] ?? null })
+  }),
+
+  http.put("/api/admin/appearance", async ({ request }) => {
+    await delay(400)
+    const host = request.headers.get("X-Tenant-Host") ?? ""
+    const { themeId } = (await request.json()) as { themeId: string }
+    const result = chooseTheme(host, themeId)
+    if (result === "not_found") return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    if (result === "forbidden") return HttpResponse.json({ message: "Plan does not allow it" }, { status: 403 })
+    return new HttpResponse(null, { status: 204 })
+  }),
+
 ]

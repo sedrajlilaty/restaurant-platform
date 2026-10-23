@@ -396,6 +396,33 @@
       "settings": "الإعدادات",
       "viewSite": "عرض الموقع"
     }
+  },  "appearance": {
+    "title": "Appearance",
+    "desc": "Choose how your restaurant's site looks: colors and fonts.",
+    "saved": "Appearance saved",
+    "saveError": "Couldn't save the appearance, try again",
+    "loadError": "Couldn't load the themes",
+    "current": "Current",
+    "locked": "Locked",
+    "mode": { "light": "Light", "dark": "Dark" },
+    "presets": {
+      "title": "Ready-made themes",
+      "desc": "Pick a theme and check the preview before saving."
+    },
+    "custom": {
+      "title": "Your restaurant's theme",
+      "locked": "This theme isn't available on your current plan. Upgrade to use it."
+    },
+    "preview": {
+      "title": "Preview",
+      "search": "Search for a dish",
+      "categories": { "all": "All", "main": "Main dishes", "drinks": "Drinks" },
+      "badge": "New",
+      "product": "Beef burger",
+      "productDesc": "Beef patty with cheese and our special sauce",
+      "price": "$12.50",
+      "adjusted": "We slightly adjusted the theme color so the text stays readable."
+    }
   }
    
 }
