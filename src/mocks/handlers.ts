@@ -9,6 +9,7 @@ import type { StoreSettings } from "@/features/tenant"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
 import { chooseTheme, customThemes } from "./appearanceData"
+import { findAccount } from "./accountsData"
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000
 
@@ -31,17 +32,12 @@ export const handlers = [
   }),
 
   // تسجيل الدخول
-  http.post("/api/auth/login", async ({ request }) => {
+    http.post("/api/auth/login", async ({ request }) => {
     const { email, password } = (await request.json()) as { email: string; password: string }
-    if (password === "123456" && email === "admin@demo.com") {
-      return HttpResponse.json({ token: "mock-owner-token", user: { id: "u1", name: "Demo Owner", role: "owner" } })
-    }
-    if (password === "123456" && email === "super@platform.com") {
-      return HttpResponse.json({ token: "mock-super-token", user: { id: "u0", name: "Platform Admin", role: "superadmin" } })
-    }
-    return HttpResponse.json({ message: "Invalid credentials" }, { status: 401 })
+    const session = findAccount(email, password)
+    if (!session) return HttpResponse.json({ message: "Invalid credentials" }, { status: 401 })
+    return HttpResponse.json(session)
   }),
-
   // المنيو
   http.get("/api/public/banners", async () => {
     await delay(300)

@@ -6,6 +6,7 @@ import { tablesDb } from "./tablesData"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
 import { chooseTheme, customThemes, presetThemes } from "./appearanceData"
+import { changeAccountPassword, renameAccount, tokenFrom } from "./accountsData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 
 export const adminHandlers = [
@@ -166,6 +167,28 @@ export const adminHandlers = [
     const result = chooseTheme(host, themeId)
     if (result === "not_found") return HttpResponse.json({ message: "Not found" }, { status: 404 })
     if (result === "forbidden") return HttpResponse.json({ message: "Plan does not allow it" }, { status: 403 })
+    return new HttpResponse(null, { status: 204 })
+  }),
+    // حسابي
+  http.patch("/api/admin/account", async ({ request }) => {
+    await delay(400)
+    const { name } = (await request.json()) as { name: string }
+    const user = renameAccount(tokenFrom(request), name.trim())
+    if (!user) return HttpResponse.json({ message: "Unauthorized" }, { status: 401 })
+    return HttpResponse.json(user)
+  }),
+
+  http.put("/api/admin/account/password", async ({ request }) => {
+    await delay(500)
+    const { currentPassword, newPassword } = (await request.json()) as {
+      currentPassword: string
+      newPassword: string
+    }
+    const result = changeAccountPassword(tokenFrom(request), currentPassword, newPassword)
+    if (result === "unauthorized") return HttpResponse.json({ message: "Unauthorized" }, { status: 401 })
+    if (result === "wrong_password") {
+      return HttpResponse.json({ code: "WRONG_PASSWORD", message: "Wrong password" }, { status: 400 })
+    }
     return new HttpResponse(null, { status: 204 })
   }),
 
