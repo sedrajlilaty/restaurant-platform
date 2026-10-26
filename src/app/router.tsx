@@ -12,7 +12,7 @@ import { RequireFeature } from "./guards/RequireFeature"
 import { ThemeDemoPage } from "../app/dev/ThemeDemoPage"
 import { CartPage } from "@/features/cart"
 import { CheckoutPage, OrderSuccessPage, TableEntryPage } from "@/features/checkout"
-import { AppearancePage, CategoriesPage, TablesPage, TablesPrintPage, SettingsPage, DashboardPage } from "@/features/admin"
+import { AccountPage, AppearancePage, CategoriesPage, TablesPage, TablesPrintPage, SettingsPage, DashboardPage } from "@/features/admin"
 import { AboutPage, CategoryPage, HomePage, ProductPage, SearchPage } from "@/features/menu"
 const page = (titleKey: string): ReactNode => <PlaceholderPage titleKey={titleKey} />
 const gated = (feature: FeatureKey, titleKey: string): ReactNode => (
@@ -70,8 +70,7 @@ export const restaurantRouter = createBrowserRouter([
       { path: "analytics", element: gated("analytics", "nav.analytics") },
       { path: "appearance", element: <AppearancePage /> },      { path: "settings", element: <SettingsPage /> },      { path: "import-export", element: gated("import_export", "nav.importExport") },
       { path: "snapshots", element: gated("snapshots", "nav.snapshots") },
-      { path: "account", element: page("nav.account") },
-    ],
+      { path: "account", element: <AccountPage /> },    ],
   },
   { path: "*", element: <NotFoundPage /> },
 ])

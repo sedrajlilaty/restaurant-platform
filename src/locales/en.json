@@ -424,5 +424,32 @@
       "adjusted": "We slightly adjusted the theme color so the text stays readable."
     }
   }
-   
+   ,
+     "account": {
+    "title": "My Account",
+    "desc": "Change your name and password.",
+    "saveError": "Couldn't save, try again",
+    "profile": {
+      "title": "Account details",
+      "desc": "The name shown in the admin panel.",
+      "name": "Name",
+      "saved": "Name updated"
+    },
+    "password": {
+      "title": "Change password",
+      "desc": "Enter your current password, then the new one.",
+      "current": "Current password",
+      "new": "New password",
+      "newHint": "At least 6 characters",
+      "confirm": "Confirm new password",
+      "wrong": "The current password is wrong",
+      "saved": "Password changed"
+    },
+    "errors": {
+      "required": "This field is required",
+      "passwordShort": "Password is too short, at least 6 characters",
+      "mismatch": "The passwords don't match",
+      "same": "The new password must be different from the current one"
+    }
+  }
 }
