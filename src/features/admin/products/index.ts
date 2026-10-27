@@ -1,0 +1,1 @@
+export type { AdminProduct, ProductInput } from "./products.types"

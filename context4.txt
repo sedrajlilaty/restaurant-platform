@@ -1,0 +1,772 @@
+﻿===== categories feature files =====
+features\admin\categories\categories.api.ts
+features\admin\categories\categories.types.ts
+features\admin\categories\CategoriesPage.tsx
+features\admin\categories\CategoryForm.tsx
+
+===== features\admin\categories\categories.api.ts =====
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { api } from "@/lib/api"
+import type { AdminCategory, CategoryInput } from "./categories.types"
+
+const KEY = ["admin", "categories"]
+const CUSTOMER_KEY = ["menu", "categories"]
+
+// Ø¨Ø¹Ø¯ Ø£ÙŠ ØªØ¹Ø¯ÙŠÙ„ Ù…Ù†Ø­Ø¯Ù‘Ø« ÙƒÙ…Ø§Ù† Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„ØªØµÙ†ÙŠÙØ§Øª Ø§Ù„Ù„ÙŠ Ø¨ØªØ¸Ù‡Ø± Ù„Ù„Ø²Ø¨ÙˆÙ†
+function useRefresh() {
+  const queryClient = useQueryClient()
+  return () => {
+    void queryClient.invalidateQueries({ queryKey: KEY })
+    void queryClient.invalidateQueries({ queryKey: CUSTOMER_KEY })
+  }
+}
+
+export const useAdminCategories = () =>
+  useQuery({
+    queryKey: KEY,
+    queryFn: async () => (await api.get<AdminCategory[]>("/admin/categories")).data,
+  })
+
+export function useCreateCategory() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: async (input: CategoryInput) => (await api.post<AdminCategory>("/admin/categories", input)).data,
+    onSuccess: refresh,
+  })
+}
+
+export function useUpdateCategory() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: { id: string } & Partial<CategoryInput>) =>
+      (await api.patch<AdminCategory>(`/admin/categories/${id}`, patch)).data,
+    onSuccess: refresh,
+  })
+}
+
+export function useDeleteCategory() {
+  const refresh = useRefresh()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await api.delete(`/admin/categories/${id}`)
+    },
+    onSuccess: refresh,
+  })
+}
+
+// Ø¥Ø¹Ø§Ø¯Ø© Ø§Ù„ØªØ±ØªÙŠØ¨: Ø¨Ù†ØºÙŠÙ‘Ø± Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© ÙÙˆØ±Ø§Ù‹ (optimistic) ÙˆØ¥Ø°Ø§ ÙØ´Ù„ Ø§Ù„Ø·Ù„Ø¨ Ù…Ù†Ø±Ø¬Ù‘Ø¹Ù‡Ø§
+export function useReorderCategories() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      await api.put("/admin/categories/reorder", { ids })
+    },
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: KEY })
+      const previous = queryClient.getQueryData<AdminCategory[]>(KEY)
+      if (previous) {
+        const byId = new Map(previous.map((category) => [category.id, category]))
+        queryClient.setQueryData<AdminCategory[]>(
+          KEY,
+          ids.flatMap((id, index) => {
+            const category = byId.get(id)
+            return category ? [{ ...category, sortOrder: index }] : []
+          }),
+        )
+      }
+      return { previous }
+    },
+    onError: (_error, _ids, context) => {
+      if (context?.previous) queryClient.setQueryData(KEY, context.previous)
+    },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: KEY })
+      void queryClient.invalidateQueries({ queryKey: CUSTOMER_KEY })
+    },
+  })
+}
+
+===== features\admin\categories\categories.types.ts =====
+import type { LocalizedText } from "@/types"
+
+export type AdminCategory = {
+  id: string
+  name: LocalizedText
+  imageUrl: string | null
+  isActive: boolean
+  sortOrder: number
+}
+
+export type CategoryInput = {
+  name: LocalizedText
+  imageUrl: string | null
+  isActive: boolean
+}
+
+===== features\admin\categories\CategoriesPage.tsx =====
+import { useMemo, useState } from "react"
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core"
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import axios from "axios"
+import { GripVertical, Pencil, Plus, Tags, Trash2, UtensilsCrossed } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { ConfirmDialog } from "@/components/shared/ConfirmDialog"
+import { EmptyState } from "@/components/shared/EmptyState"
+import { PageHeader } from "@/components/shared/PageHeader"
+import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { useLang } from "@/hooks/useLang"
+import { cn } from "@/lib/utils"
+import { CategoryForm } from "./CategoryForm"
+import { useAdminCategories, useDeleteCategory, useReorderCategories, useUpdateCategory } from "./categories.api"
+import type { AdminCategory } from "./categories.types"
+
+type RowProps = { category: AdminCategory; onEdit: () => void; onDelete: () => void }
+
+function SortableRow({ category, onEdit, onDelete }: RowProps) {
+  const { t } = useTranslation()
+  const lang = useLang()
+  const update = useUpdateCategory()
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: category.id })
+
+  const primary = category.name[lang] || category.name.ar
+  const secondary = lang === "ar" ? category.name.en : category.name.ar
+
+  return (
+    <li
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(
+        "flex items-center gap-3 rounded-3xl border bg-card p-3 shadow-sm",
+        isDragging && "relative z-10 shadow-lg",
+        !category.isActive && "opacity-70",
+      )}
+    >
+      <button
+        type="button"
+        aria-label={t("categories.drag")}
+        className="grid size-9 shrink-0 cursor-grab touch-none place-items-center rounded-full text-muted-foreground hover:bg-muted active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <GripVertical className="size-5" />
+      </button>
+
+      <div className="size-12 shrink-0 overflow-hidden rounded-2xl bg-muted">
+        {category.imageUrl ? (
+          <img src={category.imageUrl} alt="" className="size-full object-cover" />
+        ) : (
+          <span className="grid size-full place-items-center text-muted-foreground">
+            <UtensilsCrossed className="size-5" />
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-semibold">{primary}</p>
+        <p className="truncate text-xs text-muted-foreground">{secondary}</p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Switch
+          aria-label={t("categories.form.visible")}
+          checked={category.isActive}
+          disabled={update.isPending}
+          onCheckedChange={(checked) =>
+            update.mutate(
+              { id: category.id, isActive: checked },
+              { onError: () => toast.error(t("categories.errors.generic")) },
+            )
+          }
+        />
+        <span className="hidden w-20 text-xs text-muted-foreground sm:inline">
+          {category.isActive ? t("categories.active") : t("categories.hidden")}
+        </span>
+      </div>
+
+      <div className="flex">
+        <Button variant="ghost" size="icon" onClick={onEdit} aria-label={t("common.edit")}>
+          <Pencil className="size-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={onDelete} aria-label={t("common.delete")} className="text-destructive">
+          <Trash2 className="size-4" />
+        </Button>
+      </div>
+    </li>
+  )
+}
+
+export function CategoriesPage() {
+  const { t } = useTranslation()
+  const lang = useLang()
+  const query = useAdminCategories()
+  const reorder = useReorderCategories()
+  const remove = useDeleteCategory()
+  const [dialog, setDialog] = useState<{ category?: AdminCategory } | null>(null)
+  const [toDelete, setToDelete] = useState<AdminCategory | null>(null)
+
+  const items = useMemo(() => [...(query.data ?? [])].sort((a, b) => a.sortOrder - b.sortOrder), [query.data])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  function handleDragEnd({ active, over }: DragEndEvent) {
+    if (!over || active.id === over.id) return
+    const ids = items.map((category) => category.id)
+    const next = arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id)))
+    reorder.mutate(next, { onError: () => toast.error(t("categories.errors.generic")) })
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-5">
+      <PageHeader
+        title={t("categories.title")}
+        description={t("categories.subtitle")}
+        actions={
+          <Button className="gap-2" onClick={() => setDialog({})}>
+            <Plus className="size-4" />
+            {t("categories.add")}
+          </Button>
+        }
+      />
+
+      {query.isPending ? (
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-[72px] animate-pulse rounded-3xl bg-muted" />
+          ))}
+        </div>
+      ) : query.isError ? (
+        <EmptyState title={t("categories.errors.generic")} />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={Tags}
+          title={t("categories.empty")}
+          action={<p className="text-sm text-muted-foreground">{t("categories.emptyHint")}</p>}
+        />
+      ) : (
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+
+===== features\admin\categories\CategoryForm.tsx =====
+import { Controller, useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { z } from "zod"
+import { ImageUpload } from "@/components/shared/ImageUpload"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
+import { requiredText } from "@/lib/validation"
+import { useCreateCategory, useUpdateCategory } from "./categories.api"
+import type { AdminCategory } from "./categories.types"
+
+const schema = z.object({
+  nameAr: requiredText(60),
+  nameEn: requiredText(60),
+  imageUrl: z.string().nullable(),
+  isActive: z.boolean(),
+})
+type Values = z.infer<typeof schema>
+
+function FieldError({ message }: { message?: string }) {
+  const { t } = useTranslation()
+  if (!message) return null
+  return (
+    <p role="alert" className="text-sm text-destructive">
+      {t(message)}
+    </p>
+  )
+}
+
+type Props = { category?: AdminCategory; onClose: () => void }
+
+export function CategoryForm({ category, onClose }: Props) {
+  const { t } = useTranslation()
+  const create = useCreateCategory()
+  const update = useUpdateCategory()
+  const pending = create.isPending || update.isPending
+
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      nameAr: category?.name.ar ?? "",
+      nameEn: category?.name.en ?? "",
+      imageUrl: category?.imageUrl ?? null,
+      isActive: category?.isActive ?? true,
+    },
+  })
+  const { errors } = form.formState
+
+  function onSubmit(values: Values) {
+    const input = {
+      name: { ar: values.nameAr, en: values.nameEn },
+      imageUrl: values.imageUrl,
+      isActive: values.isActive,
+    }
+    const options = {
+      onSuccess: () => {
+        toast.success(t(category ? "categories.toast.updated" : "categories.toast.added"))
+        onClose()
+      },
+      onError: () => form.setError("root", { message: "categories.errors.generic" }),
+    }
+    if (category) update.mutate({ id: category.id, ...input }, options)
+    else create.mutate(input, options)
+  }
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{category ? t("categories.form.editTitle") : t("categories.form.addTitle")}</DialogTitle>
+          <DialogDescription className="sr-only">{t("categories.subtitle")}</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} noValidate className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="nameAr">{t("categories.form.nameAr")}</Label>
+            <Input id="nameAr" dir="rtl" autoFocus {...form.register("nameAr")} />
+            <FieldError message={errors.nameAr?.message} />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nameEn">{t("categories.form.nameEn")}</Label>
+            <Input id="nameEn" dir="ltr" {...form.register("nameEn")} />
+            <FieldError message={errors.nameEn?.message} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>{t("categories.form.image")}</Label>
+            <Controller
+              control={form.control}
+              name="imageUrl"
+              render={({ field }) => <ImageUpload value={field.value} onChange={field.onChange} />}
+            />
+          </div>
+
+          <Controller
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <label className="flex items-center justify-between gap-3 rounded-2xl border p-3">
+                <span className="text-sm font-medium">{t("categories.form.visible")}</span>
+                <Switch checked={field.value} onCheckedChange={field.onChange} />
+              </label>
+            )}
+          />
+
+          <FieldError message={errors.root?.message} />
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              {t("common.cancel")}
+            </Button>
+            <Button type="submit" disabled={pending}>
+              {pending ? t("common.saving") : t("common.save")}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+===== types\index.ts =====
+export type LocalizedText = { ar: string; en: string }
+export type OrderType = "dine_in" | "takeaway" | "delivery"
+export type PaymentMethodKey = "cash" | "shamcash"
+
+===== mocks\menuData.ts =====
+import type { Banner, Category, OptionGroup, Product } from "@/features/menu"
+import { CLASSIFY_GROUP_ID } from "@/lib/constants"
+export const banners: Banner[] = [
+  {
+    id: "b1",
+    title: { ar: "Ø·Ø¹Ù… Ù„Ø§ ÙŠÙÙ†Ø³Ù‰", en: "A taste you won't forget" },
+    subtitle: { ar: "Ø£Ø·Ø¨Ø§Ù‚ Ø·Ø§Ø²Ø¬Ø© ØªÙØ­Ø¶Ù‘Ø± Ø¨Ø­Ø¨", en: "Fresh dishes made with love" },
+    ctaLabel: { ar: "Ø§Ø·Ù„Ø¨ Ø§Ù„Ø¢Ù†", en: "Order now" },
+    ctaLink: "/search",
+    imageUrl: null,
+  },
+  {
+    id: "b2",
+    title: { ar: "Ø¹Ø±Ø¶ Ù†Ù‡Ø§ÙŠØ© Ø§Ù„Ø£Ø³Ø¨ÙˆØ¹", en: "Weekend special" },
+    subtitle: { ar: "Ø®ØµÙ… 20% Ø¹Ù„Ù‰ ÙƒÙ„ Ø§Ù„Ø·Ù„Ø¨Ø§Øª", en: "20% off all orders" },
+    ctaLabel: { ar: "Ø´Ø§Ù‡Ø¯ Ø§Ù„Ø¹Ø±ÙˆØ¶", en: "See offers" },
+    ctaLink: "/search",
+    imageUrl: null,
+  },
+  {
+    id: "b3",
+    title: { ar: "Ø­Ù„ÙˆÙŠØ§Øª Ø¬Ø¯ÙŠØ¯Ø©", en: "New desserts" },
+    subtitle: { ar: "Ø¬Ø±Ù‘Ø¨ Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Try the chocolate brownie" },
+    ctaLabel: null,
+    ctaLink: null,
+    imageUrl: null,
+  },
+]
+
+export const categories: Category[] = [
+  { id: "c1", name: { ar: "Ø¨Ø±ØºØ±", en: "Burgers" }, imageUrl: null },
+  { id: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§", en: "Pizza" }, imageUrl: null },
+  { id: "c3", name: { ar: "Ø³Ù„Ø·Ø§Øª", en: "Salads" }, imageUrl: null },
+  { id: "c4", name: { ar: "Ù…Ø´Ø±ÙˆØ¨Ø§Øª", en: "Drinks" }, imageUrl: null },
+  { id: "c5", name: { ar: "Ø­Ù„ÙˆÙŠØ§Øª", en: "Desserts" }, imageUrl: null },
+]
+
+export type MockProduct = Product & { featured: boolean }
+
+const base = { oldPrice: null, imageUrl: null, available: true } as const
+
+export const products: MockProduct[] = [
+  { ...base, id: "p1", categoryId: "c1", name: { ar: "Ø¨Ø±ØºØ± Ù„Ø­Ù… ÙƒÙ„Ø§Ø³ÙŠÙƒ", en: "Classic Beef Burger" }, description: { ar: "Ù„Ø­Ù… Ø¨Ù‚Ø±ÙŠØŒ Ø¬Ø¨Ù†Ø©ØŒ ØµÙ„ØµØ© Ø§Ù„Ø¨ÙŠØª", en: "Beef patty, cheese, house sauce" }, price: 8.5, badge: "bestseller", rating: { value: 4.8, count: 1200 }, hasOptions: true, featured: true },
+  { ...base, id: "p2", categoryId: "c1", name: { ar: "Ø¨Ø±ØºØ± Ø¯Ø¬Ø§Ø¬ Ù…Ù‚Ø±Ù…Ø´", en: "Crispy Chicken Burger" }, description: { ar: "Ø¯Ø¬Ø§Ø¬ Ù…Ù‚Ø±Ù…Ø´ Ù…Ø¹ Ù…Ø§ÙŠÙˆÙ†ÙŠØ² ÙˆØ®Ø³", en: "Crispy chicken, mayo and lettuce" }, price: 7.25, badge: "hot", rating: { value: 4.6, count: 640 }, hasOptions: false, featured: true },
+  { ...base, id: "p3", categoryId: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§ Ù…Ø§Ø±ØºØ±ÙŠØªØ§", en: "Margherita Pizza" }, description: { ar: "Ø¬Ø¨Ù†Ø© Ù…ÙˆØ²Ø§Ø±ÙŠÙ„Ø§ ÙˆØ·Ù…Ø§Ø·Ù… ÙˆØ±ÙŠØ­Ø§Ù†", en: "Mozzarella, tomato and basil" }, price: 9, badge: "popular", rating: { value: 4.7, count: 870 }, hasOptions: true, featured: true },
+  { ...base, id: "p4", categoryId: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§ Ø®Ø¶Ø§Ø±", en: "Veggie Pizza" }, description: { ar: "ÙØ·Ø± ÙˆÙÙ„ÙÙ„ ÙˆØ²ÙŠØªÙˆÙ† ÙˆØ°Ø±Ø©", en: "Mushrooms, peppers, olives and corn" }, price: 8.75, badge: null, rating: { value: 4.4, count: 210 }, hasOptions: true, featured: false },
+  { ...base, id: "p5", categoryId: "c3", name: { ar: "Ø³Ù„Ø·Ø© Ø³ÙŠØ²Ø±", en: "Caesar Salad" }, description: { ar: "Ø®Ø³ Ø±ÙˆÙ…ÙŠÙ† ÙˆØ¬Ø¨Ù†Ø© Ø¨Ø§Ø±Ù…ÙŠØ²Ø§Ù† ÙˆØµÙ„ØµØ© Ø³ÙŠØ²Ø±", en: "Romaine, parmesan and Caesar dressing" }, price: 6.5, badge: "chefs_pick", rating: { value: 4.9, count: 456 }, hasOptions: false, featured: true },
+  { ...base, id: "p6", categoryId: "c3", name: { ar: "Ø³Ù„Ø·Ø© ÙŠÙˆÙ†Ø§Ù†ÙŠØ©", en: "Greek Salad" }, description: { ar: "Ø®ÙŠØ§Ø± ÙˆØ·Ù…Ø§Ø·Ù… ÙˆØ¬Ø¨Ù†Ø© ÙÙŠØªØ§ ÙˆØ²ÙŠØªÙˆÙ†", en: "Cucumber, tomato, feta and olives" }, price: 6, badge: null, rating: { value: 4.3, count: 130 }, hasOptions: false, featured: false },
+  { ...base, id: "p7", categoryId: "c4", name: { ar: "Ù„ÙŠÙ…ÙˆÙ†Ø§Ø¶Ø© Ø¨Ø§Ù„Ù†Ø¹Ù†Ø§Ø¹", en: "Mint Lemonade" }, description: { ar: "Ù„ÙŠÙ…ÙˆÙ† Ø·Ø§Ø²Ø¬ ÙˆÙ†Ø¹Ù†Ø§Ø¹ ÙˆØ«Ù„Ø¬", en: "Fresh lemon, mint and ice" }, price: 3, badge: "popular", rating: { value: 4.7, count: 920 }, hasOptions: false, featured: true },
+  { ...base, id: "p8", categoryId: "c4", name: { ar: "Ù‚Ù‡ÙˆØ© Ù…Ø«Ù„Ø¬Ø©", en: "Iced Coffee" }, description: { ar: "Ø¥Ø³Ø¨Ø±ÙŠØ³Ùˆ Ù…Ø¹ Ø­Ù„ÙŠØ¨ ÙˆØ«Ù„Ø¬", en: "Espresso with milk and ice" }, price: 3.75, badge: null, rating: { value: 4.5, count: 310 }, hasOptions: false, featured: false },
+  { ...base, id: "p9", categoryId: "c5", name: { ar: "Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø¨Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Chocolate Brownie" }, description: { ar: "Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø¯Ø§ÙØ¦ Ù…Ø¹ ØµÙ„ØµØ© Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Warm brownie with chocolate sauce" }, price: 4.5, badge: "new", rating: { value: 4.8, count: 540 }, hasOptions: false, featured: true },
+  { ...base, id: "p10", categoryId: "c5", name: { ar: "ØªØ´ÙŠØ² ÙƒÙŠÙƒ", en: "Cheesecake" }, description: { ar: "ØªØ´ÙŠØ² ÙƒÙŠÙƒ Ø¨Ø§Ù„ØªÙˆØª", en: "Cheesecake with berries" }, price: 5, oldPrice: 6, badge: null, rating: { value: 4.6, count: 300 }, hasOptions: false, featured: false },
+  { ...base, id: "p11", categoryId: "c5", name: { ar: "ÙƒÙ†Ø§ÙØ© Ø¨Ø§Ù„Ø¬Ø¨Ù†Ø©", en: "Cheese Kunafa" }, description: { ar: "ÙƒÙ†Ø§ÙØ© Ù†Ø§Ø¹Ù…Ø© Ø¨Ø§Ù„Ø¬Ø¨Ù†Ø© ÙˆØ§Ù„Ù‚Ø·Ø±", en: "Soft kunafa with cheese and syrup" }, price: 5.5, badge: null, rating: null, available: false, hasOptions: false, featured: false },
+]
+const sizeGroup = (id: string, withDefault = true): OptionGroup => ({
+   id: CLASSIFY_GROUP_ID,
+  name: { ar: "Ø§Ù„Ø­Ø¬Ù…", en: "Size" },
+  type: "single",
+  required: true,
+  min: 1,
+  max: 1,
+  choices: [
+    { id: `${id}-s`, name: { ar: "ØµØºÙŠØ±", en: "Small" }, price: 0, isDefault: withDefault },
+    { id: `${id}-m`, name: { ar: "ÙˆØ³Ø·", en: "Medium" }, price: 1.5, isDefault: false },
+    { id: `${id}-l`, name: { ar: "ÙƒØ¨ÙŠØ±", en: "Large" }, price: 3, isDefault: false },
+  ],
+})
+
+const extrasGroup = (id: string): OptionGroup => ({
+  id: `${id}-extras`,
+
+===== mocks\categoriesData.ts =====
+import type { AdminCategory } from "@/features/admin"
+import { categories as seed } from "./menuData"
+
+export const categoriesDb: { list: AdminCategory[] } = {
+  list: seed.map((category, index) => ({
+    id: category.id,
+    name: category.name,
+    imageUrl: category.imageUrl,
+    isActive: true,
+    sortOrder: index,
+  })),
+}
+
+===== hooks\usePrice.ts =====
+import { useRestaurant } from "@/features/tenant/useTenant"
+import { formatPrice } from "@/lib/format"
+import { useLang } from "./useLang"
+
+export function usePrice() {
+  const { currency } = useRestaurant()
+  const lang = useLang()
+  return (value: number) => formatPrice(value, currency, lang)
+}
+
+===== lib\format.ts =====
+import type { Lang } from "@/lib/i18n"
+
+export function formatPrice(value: number, currency: string, lang: Lang) {
+  const locale = lang === "ar" ? "ar-u-nu-latn" : "en"
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: currency === "SYP" ? 0 : 2,
+    }).format(value)
+  } catch {
+    return `${value} ${currency}`
+  }
+}
+
+===== lib\upload.ts =====
+import { api } from "./api"
+
+export const IMAGE_MAX_BYTES = 2 * 1024 * 1024
+export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
+
+// Ø¨ÙŠØ±ÙØ¹ Ø§Ù„ØµÙˆØ±Ø© ÙˆÙŠØ±Ø¬Ù‘Ø¹ Ø±Ø§Ø¨Ø·Ù‡Ø§
+export async function uploadImage(file: File) {
+  const body = new FormData()
+  body.append("file", file)
+  const { data } = await api.post<{ url: string }>("/admin/uploads", body)
+  return data.url
+}
+
+===== lib\validation.ts =====
+import { z } from "zod"
+
+export const requiredText = (max = 100) =>
+  z.string().trim().min(1, "validation.required").max(max, "validation.tooLong")
+
+const PHONE = /^(\+?963|0)?9\d{8}$/
+const normalizePhone = (value: string) => value.replace(/[\s-]/g, "")
+
+// 09xxxxxxxx Ø£Ùˆ +9639xxxxxxxxØŒ Ù…Ø¹ Ø£Ùˆ Ø¨Ø¯ÙˆÙ† Ù…Ø³Ø§ÙØ§Øª ÙˆØ´Ø±Ø·Ø§Øª
+export const phone = z
+  .string()
+  .trim()
+  .transform(normalizePhone)
+  .refine((value) => PHONE.test(value), "validation.phone")
+
+// Ø±Ù‚Ù… Ø§Ø®ØªÙŠØ§Ø±ÙŠ: Ø§Ù„ÙØ§Ø¶ÙŠ Ù…Ù‚Ø¨ÙˆÙ„
+export const optionalPhone = z
+  .string()
+  .trim()
+  .transform(normalizePhone)
+  .refine((value) => value === "" || PHONE.test(value), "validation.phone")
+
+===== adminHandlers: categories handlers (lines 17-105) =====
+    const file = form.get("file")
+    if (!(file instanceof File)) return HttpResponse.json({ message: "No file" }, { status: 400 })
+    return HttpResponse.json({ url: URL.createObjectURL(file) })
+  }),
+
+  // Ø§Ù„Ø·Ø§ÙˆÙ„Ø§Øª
+  http.get("/api/admin/tables", async () => {
+    await delay(300)
+    return HttpResponse.json(tablesDb.list)
+  }),
+
+  http.post("/api/admin/tables", async ({ request }) => {
+    await delay(400)
+    const { tableNumbers } = (await request.json()) as { tableNumbers: string[] }
+    const existing = new Set(tablesDb.list.map((t) => t.tableNumber))
+    const duplicated = new Set(tableNumbers).size !== tableNumbers.length || tableNumbers.some((n) => existing.has(n))
+    if (duplicated) return HttpResponse.json({ message: "Duplicate table number" }, { status: 409 })
+
+    const created = tableNumbers.map((tableNumber) => ({
+      id: crypto.randomUUID(),
+      tableNumber,
+      qrToken: `tbl-${crypto.randomUUID().slice(0, 8)}`,
+      isActive: true,
+    }))
+    tablesDb.list = [...tablesDb.list, ...created]
+    return HttpResponse.json(created, { status: 201 })
+  }),
+
+  http.patch("/api/admin/tables/:id", async ({ params, request }) => {
+    await delay(300)
+    const patch = (await request.json()) as { tableNumber?: string; isActive?: boolean }
+    const current = tablesDb.list.find((t) => t.id === params.id)
+    if (!current) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    if (patch.tableNumber && tablesDb.list.some((t) => t.id !== current.id && t.tableNumber === patch.tableNumber)) {
+      return HttpResponse.json({ message: "Duplicate table number" }, { status: 409 })
+    }
+    const updated = { ...current, ...patch }
+    tablesDb.list = tablesDb.list.map((t) => (t.id === current.id ? updated : t))
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete("/api/admin/tables/:id", async ({ params }) => {
+    await delay(300)
+    tablesDb.list = tablesDb.list.filter((t) => t.id !== params.id)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  // Ø§Ù„ØªØµÙ†ÙŠÙØ§Øª
+  http.get("/api/admin/categories", async () => {
+    await delay(300)
+    return HttpResponse.json([...categoriesDb.list].sort((a, b) => a.sortOrder - b.sortOrder))
+  }),
+
+  http.post("/api/admin/categories", async ({ request }) => {
+    await delay(400)
+    const input = (await request.json()) as CategoryInput
+    const created: AdminCategory = {
+      id: crypto.randomUUID(),
+      ...input,
+      sortOrder: Math.max(-1, ...categoriesDb.list.map((c) => c.sortOrder)) + 1,
+    }
+    categoriesDb.list = [...categoriesDb.list, created]
+    return HttpResponse.json(created, { status: 201 })
+  }),
+
+  http.put("/api/admin/categories/reorder", async ({ request }) => {
+    await delay(200)
+    const { ids } = (await request.json()) as { ids: string[] }
+    const order = new Map(ids.map((id, index) => [id, index]))
+    categoriesDb.list = categoriesDb.list.map((c) => ({ ...c, sortOrder: order.get(c.id) ?? c.sortOrder }))
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.patch("/api/admin/categories/:id", async ({ params, request }) => {
+    await delay(300)
+    const patch = (await request.json()) as Partial<CategoryInput>
+    const current = categoriesDb.list.find((c) => c.id === params.id)
+    if (!current) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    const updated = { ...current, ...patch }
+    categoriesDb.list = categoriesDb.list.map((c) => (c.id === current.id ? updated : c))
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete("/api/admin/categories/:id", async ({ params }) => {
+    await delay(300)
+    if (products.some((p) => p.categoryId === params.id)) {
+      return HttpResponse.json({ code: "HAS_PRODUCTS" }, { status: 409 })
+    }
+    categoriesDb.list = categoriesDb.list.filter((c) => c.id !== params.id)
+    return new HttpResponse(null, { status: 204 })
+
+===== mocks\handlers.ts: public products handlers =====
+
+  mocks\handlers.ts:5:import {  tenants } from "./data"
+> mocks\handlers.ts:6:import { banners, optionGroupsByProduct, 
+products } from "./menuData"
+  mocks\handlers.ts:7:import { tablesDb } from "./tablesData"
+  mocks\handlers.ts:8:import type { StoreSettings } from 
+"@/features/tenant"
+  mocks\handlers.ts:9:import { settingsDb } from 
+"./settingsData"
+  mocks\handlers.ts:10:import { ordersDb } from "./ordersData"
+  mocks\handlers.ts:11:import { findAccount } from 
+"./accountsData"
+  mocks\handlers.ts:12:const money = (value: number) => 
+Math.round(value * 100) / 100
+  mocks\handlers.ts:13:let orderCounter = 1000
+  mocks\handlers.ts:14:
+  mocks\handlers.ts:15:export const handlers = [
+  mocks\handlers.ts:16:  // المطعم حسب الدومين
+  mocks\handlers.ts:17:   http.get("/api/public/restaurant", 
+({ request }) => {
+  mocks\handlers.ts:18:    const host = new 
+URL(request.url).searchParams.get("host") ?? ""
+  mocks\handlers.ts:54:
+> mocks\handlers.ts:55:  http.get("/api/public/products", 
+async ({ request }) => {
+  mocks\handlers.ts:56:    await delay(400)
+  mocks\handlers.ts:57:    const params = new 
+URL(request.url).searchParams
+  mocks\handlers.ts:58:    const categoryId = 
+params.get("categoryId")
+  mocks\handlers.ts:59:    const featured = 
+params.get("featured") === "true"
+  mocks\handlers.ts:60:    const q = (params.get("q") ?? 
+"").trim().toLowerCase()
+  mocks\handlers.ts:61:    const page = 
+Number(params.get("page") ?? 1)
+  mocks\handlers.ts:62:    const limit = 
+Number(params.get("limit") ?? 20)
+  mocks\handlers.ts:63:
+> mocks\handlers.ts:64:    let list = products
+  mocks\handlers.ts:65:    if (categoryId) list = 
+list.filter((p) => p.categoryId === categoryId)
+  mocks\handlers.ts:66:    if (featured) list = 
+list.filter((p) => p.featured)
+  mocks\handlers.ts:67:    if (q) list = list.filter((p) => 
+`${p.name.ar} ${p.name.en}`.toLowerCase().includes(q))
+  mocks\handlers.ts:68:
+  mocks\handlers.ts:69:    const items = list.slice((page - 1) 
+* limit, page * limit).map(({ featured: _f, ...product }) => 
+product)
+  mocks\handlers.ts:70:    return HttpResponse.json({ items, 
+total: list.length })
+  mocks\handlers.ts:71:  }),
+  mocks\handlers.ts:72:
+> mocks\handlers.ts:73:  http.get("/api/public/products/:id", 
+async ({ params }) => {
+  mocks\handlers.ts:74:    await delay(300)
+> mocks\handlers.ts:75:    const found = products.find((p) => 
+p.id === params.id)
+  mocks\handlers.ts:76:    if (!found) return 
+HttpResponse.json({ message: "Not found" }, { status: 404 })
+  mocks\handlers.ts:77:    const { featured: _featured, 
+...product } = found
+  mocks\handlers.ts:78:    return HttpResponse.json({ 
+...product, optionGroups: optionGroupsByProduct[found.id] ?? 
+[] })
+  mocks\handlers.ts:79:  }),
+  mocks\handlers.ts:80:
+  mocks\handlers.ts:81:  // إعدادات المطعم العامة
+  mocks\handlers.ts:82:   http.get("/api/public/settings", 
+async () => {
+  mocks\handlers.ts:83:    await delay(200)
+  mocks\handlers.ts:84:    const s = settingsDb.value
+  mocks\handlers.ts:85:    const settings: StoreSettings = {
+  mocks\handlers.ts:86:      description: s.info.description,
+  mocks\handlers.ts:87:      phoneNumber: s.info.phoneNumber 
+|| null,
+  mocks\handlers.ts:112:    for (const line of body.items) {
+> mocks\handlers.ts:113:      const product = 
+products.find((p) => p.id === line.productId)
+  mocks\handlers.ts:114:      if (!product) return 
+HttpResponse.json({ message: "Unknown product" }, { status: 
+400 })
+  mocks\handlers.ts:115:
+  mocks\handlers.ts:116:      const choices = 
+(optionGroupsByProduct[product.id] ?? []).flatMap((g) => 
+g.choices)
+  mocks\handlers.ts:117:      const classify = line.classifyId 
+? choices.find((c) => c.id === line.classifyId) : undefined
+  mocks\handlers.ts:118:      const addons = 
+line.addons.flatMap((a) => {
+  mocks\handlers.ts:119:        const choice = 
+choices.find((c) => c.id === a.addonId)
+  mocks\handlers.ts:120:        return choice ? [{ name: 
+choice.name, quantity: a.quantity, unitPrice: choice.price }] 
+: []
+  mocks\handlers.ts:121:      })
+  mocks\handlers.ts:122:
+  mocks\handlers.ts:123:      const unitPrice = money(
+  mocks\handlers.ts:124:        product.price + 
+(classify?.price ?? 0) + addons.reduce((sum, a) => sum + 
+a.unitPrice * a.quantity, 0),
+  mocks\handlers.ts:125:      )
+
+
+
+===== components\shared =====
+BottomNav.tsx
+ColorField.tsx
+ConfirmDialog.tsx
+CountBadge.tsx
+DataTable.tsx
+EmptyState.tsx
+FeatureLocked.tsx
+FormField.tsx
+ImageUpload.tsx
+LanguageSwitcher.tsx
+MoneyInput.tsx
+NotFoundPage.tsx
+PageHeader.tsx
+PlaceholderPage.tsx
+QuantityStepper.tsx
+RadioCards.tsx
+RestaurantLogo.tsx
+SectionCard.tsx
+SubscriptionBanner.tsx
+ThemeCard.tsx
+ThemePreview.tsx
+
+===== ar.json: categories block =====

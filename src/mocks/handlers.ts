@@ -8,7 +8,6 @@ import { tablesDb } from "./tablesData"
 import type { StoreSettings } from "@/features/tenant"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
-import { chooseTheme, customThemes } from "./appearanceData"
 import { findAccount } from "./accountsData"
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000

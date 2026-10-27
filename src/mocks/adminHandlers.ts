@@ -7,6 +7,7 @@ import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
 import { chooseTheme, customThemes, presetThemes } from "./appearanceData"
 import { changeAccountPassword, renameAccount, tokenFrom } from "./accountsData"
+import { productsDb, type ProductInput } from "./productsData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 
 export const adminHandlers = [
@@ -189,6 +190,31 @@ export const adminHandlers = [
     if (result === "wrong_password") {
       return HttpResponse.json({ code: "WRONG_PASSWORD", message: "Wrong password" }, { status: 400 })
     }
+    return new HttpResponse(null, { status: 204 })
+  }),
+    // المنتجات
+  http.get("/api/admin/products", async () => {
+    await delay(300)
+    return HttpResponse.json(productsDb.list())
+  }),
+
+  http.post("/api/admin/products", async ({ request }) => {
+    await delay(400)
+    const input = (await request.json()) as ProductInput
+    return HttpResponse.json(productsDb.create(input), { status: 201 })
+  }),
+
+  http.patch("/api/admin/products/:id", async ({ params, request }) => {
+    await delay(300)
+    const patch = (await request.json()) as Partial<ProductInput>
+    const updated = productsDb.update(String(params.id), patch)
+    if (!updated) return HttpResponse.json({ message: "Not found" }, { status: 404 })
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete("/api/admin/products/:id", async ({ params }) => {
+    await delay(300)
+    productsDb.remove(String(params.id))
     return new HttpResponse(null, { status: 204 })
   }),
 
