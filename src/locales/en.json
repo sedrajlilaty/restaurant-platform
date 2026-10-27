@@ -451,5 +451,56 @@
       "mismatch": "The passwords don't match",
       "same": "The new password must be different from the current one"
     }
+  },  "money": {
+    "usd": "In dollars",
+    "syp": "In Syrian pounds"
+  },
+  "products": {
+    "title": "Products",
+    "subtitle": "Add your dishes and manage their prices and availability.",
+    "add": "Add product",
+    "search": "Search for a product",
+    "all": "All",
+    "empty": "No products yet",
+    "emptyHint": "Press \"Add product\" to start.",
+    "noResults": "No results",
+    "noResultsHint": "Try another search word or a different category.",
+    "noCategories": "Add a category first",
+    "noCategoriesHint": "Every product must belong to a category. Create one from the categories page.",
+    "noCategory": "No category",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "toast": {
+      "added": "Product added",
+      "updated": "Product updated",
+      "deleted": "Product deleted"
+    },
+    "form": {
+      "addTitle": "Add product",
+      "editTitle": "Edit product",
+      "nameAr": "Name in Arabic",
+      "nameEn": "Name in English",
+      "descriptionAr": "Description in Arabic",
+      "descriptionEn": "Description in English",
+      "category": "Category",
+      "chooseCategory": "Choose a category",
+      "price": "Price",
+      "oldPrice": "Price before discount (optional)",
+      "oldPriceHint": "Shown crossed out next to the current price. Leave empty if there is no discount.",
+      "image": "Image",
+      "available": "Available to order"
+    },
+    "delete": {
+      "title": "Delete product",
+      "desc": "\"{{name}}\" will be deleted for good. This can't be undone.",
+      "confirm": "Delete"
+    },
+    "errors": {
+      "generic": "Something went wrong, try again",
+      "usd": "Enter a valid price in dollars (up to two decimals)",
+      "syp": "Enter a valid price in pounds (a whole number)",
+      "oldUsd": "The old price must be higher than the current price in dollars",
+      "oldSyp": "The old price must be higher than the current price in pounds"
+    }
   }
 }
