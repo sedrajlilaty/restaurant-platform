@@ -502,5 +502,60 @@
       "oldUsd": "The old price must be higher than the current price in dollars",
       "oldSyp": "The old price must be higher than the current price in pounds"
     }
+  },
+    "options": {
+    "title": "Sizes and extras",
+    "subtitle": "Pick a product and edit its sizes and groups of extras.",
+    "product": "Product",
+    "chooseProduct": "Choose a product",
+    "pick": "Pick a product to edit its sizes and extras",
+    "noProducts": "Add a product first",
+    "noProductsHint": "Sizes and extras belong to a product. Create one from the products page.",
+    "loadError": "Couldn't load, try again",
+    "saved": "Sizes and extras saved",
+    "saveError": "Couldn't save, try again",
+    "sizes": {
+      "title": "Sizes",
+      "desc": "The customer picks one size. The price here is added to the product price.",
+      "empty": "No sizes, so the product is ordered at its base price."
+    },
+    "groups": {
+      "title": "Groups of extras",
+      "desc": "Like sauces or add-ons. Each group has its own choosing rules.",
+      "empty": "No groups of extras.",
+      "add": "Add group"
+    },
+    "group": {
+      "title": "Group {{number}}",
+      "nameAr": "Group name in Arabic",
+      "nameEn": "Group name in English",
+      "type": "Choice type",
+      "single": "Single choice",
+      "multiple": "Multiple choices",
+      "required": "Required",
+      "requiredHint": "The customer must choose before adding to the cart",
+      "min": "Minimum",
+      "max": "Maximum",
+      "maxHint": "Leave empty for no limit"
+    },
+    "choice": {
+      "nameAr": "Name in Arabic",
+      "nameEn": "Name in English",
+      "price": "Added to the product price",
+      "default": "Selected by default",
+      "add": "Add choice"
+    },
+    "errors": {
+      "fix": "Some fields are not valid, check them and save again",
+      "usd": "Enter a valid amount in dollars (up to two decimals)",
+      "syp": "Enter a valid amount in pounds (a whole number)",
+      "count": "Enter a whole number",
+      "maxLow": "The maximum must be 1 or more",
+      "minMax": "The minimum can't be higher than the maximum",
+      "minTooHigh": "The minimum is higher than the number of choices",
+      "tooManyDefaults": "There are more default choices than the maximum",
+      "oneDefault": "Only one choice can be selected by default",
+      "noChoices": "Add at least one choice"
+    }
   }
 }
