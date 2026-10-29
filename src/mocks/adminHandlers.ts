@@ -9,6 +9,7 @@ import { chooseTheme, customThemes, presetThemes } from "./appearanceData"
 import { changeAccountPassword, renameAccount, tokenFrom } from "./accountsData"
 import { productsDb, type ProductInput } from "./productsData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
+import { optionsDb, type ProductOptions } from "./optionsData"
 
 export const adminHandlers = [
   // رفع الصور: بالتجربة بيرجع رابط مؤقت للملف (بيختفي بتحديث الصفحة)
@@ -215,6 +216,17 @@ export const adminHandlers = [
   http.delete("/api/admin/products/:id", async ({ params }) => {
     await delay(300)
     productsDb.remove(String(params.id))
+    return new HttpResponse(null, { status: 204 })
+  }),
+    // الأحجام والإضافات
+  http.get("/api/admin/products/:id/options", async ({ params }) => {
+    await delay(300)
+    return HttpResponse.json(optionsDb.get(String(params.id)))
+  }),
+
+  http.put("/api/admin/products/:id/options", async ({ params, request }) => {
+    await delay(400)
+    optionsDb.set(String(params.id), (await request.json()) as ProductOptions)
     return new HttpResponse(null, { status: 204 })
   }),
 

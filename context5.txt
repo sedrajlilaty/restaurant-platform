@@ -1,0 +1,219 @@
+﻿===== OptionGroup / choice types =====
+
+> features\menu\index.ts:10:  OptionChoice,
+> features\menu\index.ts:11:  OptionGroup,
+  features\menu\index.ts:12:  Product,
+  features\menu\index.ts:13:  ProductBadge,
+  features\menu\index.ts:14:  ProductDetail,
+  features\menu\index.ts:15:  ProductsPage,
+  features\menu\index.ts:16:  ProductsQuery,
+  features\menu\index.ts:17:} from "./menu.types"
+> features\menu\menu.types.ts:41:export type OptionChoice = {
+  features\menu\menu.types.ts:42:  id: string
+  features\menu\menu.types.ts:43:  name: LocalizedText
+  features\menu\menu.types.ts:44:  price: number // الزيادة 
+
+  features\menu\menu.types.ts:45:  isDefault: boolean
+  features\menu\menu.types.ts:46:}
+  features\menu\menu.types.ts:47:
+> features\menu\menu.types.ts:48:export type OptionGroup = {
+  features\menu\menu.types.ts:49:  id: string
+  features\menu\menu.types.ts:50:  name: LocalizedText
+  features\menu\menu.types.ts:51:  type: "single" | "multiple"
+  features\menu\menu.types.ts:52:  required: boolean
+  features\menu\menu.types.ts:53:  min: number
+  features\menu\menu.types.ts:54:  max: number | null
+> features\menu\menu.types.ts:55:  choices: OptionChoice[]
+  features\menu\menu.types.ts:56:}
+  features\menu\menu.types.ts:57:
+> features\menu\menu.types.ts:58:export type ProductDetail = 
+Product & { optionGroups: OptionGroup[] }
+  features\menu\menu.types.ts:59:export type ProductsPage = { 
+items: Product[]; total: number }
+> features\menu\selection.ts:2:import type { OptionGroup } 
+from "./menu.types"
+  features\menu\selection.ts:3:
+  features\menu\selection.ts:4:export type Selection = 
+Record<string, string[]>
+  features\menu\selection.ts:5:export type SelectionError = 
+"required" | "min" | "max"
+  features\menu\selection.ts:6:export type SelectionErrors = 
+Record<string, SelectionError>
+  features\menu\selection.ts:7:
+> features\menu\selection.ts:8:export function 
+defaultSelection(groups: OptionGroup[]): Selection {
+  features\menu\selection.ts:9:  const result: Selection = {}
+  features\menu\selection.ts:10:  for (const group of groups) {
+  features\menu\selection.ts:11:    const defaults = 
+group.choices.filter((c) => c.isDefault).map((c) => c.id)
+  features\menu\selection.ts:12:    result[group.id] = 
+group.type === "single" ? defaults.slice(0, 1) : 
+defaults.slice(0, group.max ?? defaults.length)
+  features\menu\selection.ts:13:  }
+  features\menu\selection.ts:14:  return result
+  features\menu\selection.ts:15:}
+  features\menu\selection.ts:16:
+> features\menu\selection.ts:17:export function 
+toggleChoice(group: OptionGroup, current: string[], choiceId: 
+string): string[] {
+  features\menu\selection.ts:18:  if (group.type === "single") 
+return [choiceId]
+  features\menu\selection.ts:19:  if 
+(current.includes(choiceId)) return current.filter((id) => id 
+!== choiceId)
+  features\menu\selection.ts:20:  if (group.max !== null && 
+current.length >= group.max) return current
+  features\menu\selection.ts:21:  return [...current, choiceId]
+  features\menu\selection.ts:22:}
+  features\menu\selection.ts:23:
+> features\menu\selection.ts:24:export function 
+requiredCount(group: OptionGroup) {
+  features\menu\selection.ts:25:  return group.type === 
+"single" ? (group.required ? 1 : 0) : Math.max(group.min, 
+group.required ? 1 : 0)
+  features\menu\selection.ts:26:}
+  features\menu\selection.ts:27:
+> features\menu\selection.ts:28:export function 
+validateSelection(groups: OptionGroup[], selection: 
+Selection): SelectionErrors {
+  features\menu\selection.ts:29:  const errors: 
+SelectionErrors = {}
+  features\menu\selection.ts:30:  for (const group of groups) {
+  features\menu\selection.ts:31:    const count = 
+selection[group.id]?.length ?? 0
+  features\menu\selection.ts:32:    const min = 
+requiredCount(group)
+  features\menu\selection.ts:33:    if (count < min) 
+errors[group.id] = min <= 1 ? "required" : "min"
+  features\menu\selection.ts:34:    else if (group.max !== 
+null && count > group.max) errors[group.id] = "max"
+  features\menu\selection.ts:35:  }
+  features\menu\selection.ts:36:  return errors
+  features\menu\selection.ts:37:}
+  features\menu\selection.ts:38:
+> features\menu\selection.ts:39:export function 
+selectedOptions(groups: OptionGroup[], selection: Selection): 
+CartOption[] {
+  features\menu\selection.ts:40:  return 
+groups.flatMap((group) =>
+  features\menu\selection.ts:41:    group.choices
+  features\menu\selection.ts:42:      .filter((choice) => 
+(selection[group.id] ?? []).includes(choice.id))
+  features\menu\selection.ts:43:      .map((choice) => ({
+  features\menu\selection.ts:44:        groupId: group.id,
+  features\menu\selection.ts:45:        choiceId: choice.id,
+  features\menu\selection.ts:46:        groupName: group.name,
+  features\menu\selection.ts:47:        name: choice.name,
+  features\menu\selection.ts:48:        price: choice.price,
+  features\menu\selection.ts:49:      })),
+  features\menu\selection.ts:50:  )
+  features\menu\selection.ts:51:}
+
+
+
+===== lib\constants.ts =====
+export const CLASSIFY_GROUP_ID = "classify"
+
+===== menuData.ts (last 70 lines) =====
+  },
+  {
+    id: "b3",
+    title: { ar: "Ø­Ù„ÙˆÙŠØ§Øª Ø¬Ø¯ÙŠØ¯Ø©", en: "New desserts" },
+    subtitle: { ar: "Ø¬Ø±Ù‘Ø¨ Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Try the chocolate brownie" },
+    ctaLabel: null,
+    ctaLink: null,
+    imageUrl: null,
+  },
+]
+
+export const categories: Category[] = [
+  { id: "c1", name: { ar: "Ø¨Ø±ØºØ±", en: "Burgers" }, imageUrl: null },
+  { id: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§", en: "Pizza" }, imageUrl: null },
+  { id: "c3", name: { ar: "Ø³Ù„Ø·Ø§Øª", en: "Salads" }, imageUrl: null },
+  { id: "c4", name: { ar: "Ù…Ø´Ø±ÙˆØ¨Ø§Øª", en: "Drinks" }, imageUrl: null },
+  { id: "c5", name: { ar: "Ø­Ù„ÙˆÙŠØ§Øª", en: "Desserts" }, imageUrl: null },
+]
+
+export type MockProduct = Product & { featured: boolean }
+
+const base = { oldPrice: null, imageUrl: null, available: true } as const
+
+export const products: MockProduct[] = [
+  { ...base, id: "p1", categoryId: "c1", name: { ar: "Ø¨Ø±ØºØ± Ù„Ø­Ù… ÙƒÙ„Ø§Ø³ÙŠÙƒ", en: "Classic Beef Burger" }, description: { ar: "Ù„Ø­Ù… Ø¨Ù‚Ø±ÙŠØŒ Ø¬Ø¨Ù†Ø©ØŒ ØµÙ„ØµØ© Ø§Ù„Ø¨ÙŠØª", en: "Beef patty, cheese, house sauce" }, price: 8.5, badge: "bestseller", rating: { value: 4.8, count: 1200 }, hasOptions: true, featured: true },
+  { ...base, id: "p2", categoryId: "c1", name: { ar: "Ø¨Ø±ØºØ± Ø¯Ø¬Ø§Ø¬ Ù…Ù‚Ø±Ù…Ø´", en: "Crispy Chicken Burger" }, description: { ar: "Ø¯Ø¬Ø§Ø¬ Ù…Ù‚Ø±Ù…Ø´ Ù…Ø¹ Ù…Ø§ÙŠÙˆÙ†ÙŠØ² ÙˆØ®Ø³", en: "Crispy chicken, mayo and lettuce" }, price: 7.25, badge: "hot", rating: { value: 4.6, count: 640 }, hasOptions: false, featured: true },
+  { ...base, id: "p3", categoryId: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§ Ù…Ø§Ø±ØºØ±ÙŠØªØ§", en: "Margherita Pizza" }, description: { ar: "Ø¬Ø¨Ù†Ø© Ù…ÙˆØ²Ø§Ø±ÙŠÙ„Ø§ ÙˆØ·Ù…Ø§Ø·Ù… ÙˆØ±ÙŠØ­Ø§Ù†", en: "Mozzarella, tomato and basil" }, price: 9, badge: "popular", rating: { value: 4.7, count: 870 }, hasOptions: true, featured: true },
+  { ...base, id: "p4", categoryId: "c2", name: { ar: "Ø¨ÙŠØªØ²Ø§ Ø®Ø¶Ø§Ø±", en: "Veggie Pizza" }, description: { ar: "ÙØ·Ø± ÙˆÙÙ„ÙÙ„ ÙˆØ²ÙŠØªÙˆÙ† ÙˆØ°Ø±Ø©", en: "Mushrooms, peppers, olives and corn" }, price: 8.75, badge: null, rating: { value: 4.4, count: 210 }, hasOptions: true, featured: false },
+  { ...base, id: "p5", categoryId: "c3", name: { ar: "Ø³Ù„Ø·Ø© Ø³ÙŠØ²Ø±", en: "Caesar Salad" }, description: { ar: "Ø®Ø³ Ø±ÙˆÙ…ÙŠÙ† ÙˆØ¬Ø¨Ù†Ø© Ø¨Ø§Ø±Ù…ÙŠØ²Ø§Ù† ÙˆØµÙ„ØµØ© Ø³ÙŠØ²Ø±", en: "Romaine, parmesan and Caesar dressing" }, price: 6.5, badge: "chefs_pick", rating: { value: 4.9, count: 456 }, hasOptions: false, featured: true },
+  { ...base, id: "p6", categoryId: "c3", name: { ar: "Ø³Ù„Ø·Ø© ÙŠÙˆÙ†Ø§Ù†ÙŠØ©", en: "Greek Salad" }, description: { ar: "Ø®ÙŠØ§Ø± ÙˆØ·Ù…Ø§Ø·Ù… ÙˆØ¬Ø¨Ù†Ø© ÙÙŠØªØ§ ÙˆØ²ÙŠØªÙˆÙ†", en: "Cucumber, tomato, feta and olives" }, price: 6, badge: null, rating: { value: 4.3, count: 130 }, hasOptions: false, featured: false },
+  { ...base, id: "p7", categoryId: "c4", name: { ar: "Ù„ÙŠÙ…ÙˆÙ†Ø§Ø¶Ø© Ø¨Ø§Ù„Ù†Ø¹Ù†Ø§Ø¹", en: "Mint Lemonade" }, description: { ar: "Ù„ÙŠÙ…ÙˆÙ† Ø·Ø§Ø²Ø¬ ÙˆÙ†Ø¹Ù†Ø§Ø¹ ÙˆØ«Ù„Ø¬", en: "Fresh lemon, mint and ice" }, price: 3, badge: "popular", rating: { value: 4.7, count: 920 }, hasOptions: false, featured: true },
+  { ...base, id: "p8", categoryId: "c4", name: { ar: "Ù‚Ù‡ÙˆØ© Ù…Ø«Ù„Ø¬Ø©", en: "Iced Coffee" }, description: { ar: "Ø¥Ø³Ø¨Ø±ÙŠØ³Ùˆ Ù…Ø¹ Ø­Ù„ÙŠØ¨ ÙˆØ«Ù„Ø¬", en: "Espresso with milk and ice" }, price: 3.75, badge: null, rating: { value: 4.5, count: 310 }, hasOptions: false, featured: false },
+  { ...base, id: "p9", categoryId: "c5", name: { ar: "Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø¨Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Chocolate Brownie" }, description: { ar: "Ø¨Ø±Ø§ÙˆÙ†ÙŠ Ø¯Ø§ÙØ¦ Ù…Ø¹ ØµÙ„ØµØ© Ø§Ù„Ø´ÙˆÙƒÙˆÙ„Ø§", en: "Warm brownie with chocolate sauce" }, price: 4.5, badge: "new", rating: { value: 4.8, count: 540 }, hasOptions: false, featured: true },
+  { ...base, id: "p10", categoryId: "c5", name: { ar: "ØªØ´ÙŠØ² ÙƒÙŠÙƒ", en: "Cheesecake" }, description: { ar: "ØªØ´ÙŠØ² ÙƒÙŠÙƒ Ø¨Ø§Ù„ØªÙˆØª", en: "Cheesecake with berries" }, price: 5, oldPrice: 6, badge: null, rating: { value: 4.6, count: 300 }, hasOptions: false, featured: false },
+  { ...base, id: "p11", categoryId: "c5", name: { ar: "ÙƒÙ†Ø§ÙØ© Ø¨Ø§Ù„Ø¬Ø¨Ù†Ø©", en: "Cheese Kunafa" }, description: { ar: "ÙƒÙ†Ø§ÙØ© Ù†Ø§Ø¹Ù…Ø© Ø¨Ø§Ù„Ø¬Ø¨Ù†Ø© ÙˆØ§Ù„Ù‚Ø·Ø±", en: "Soft kunafa with cheese and syrup" }, price: 5.5, badge: null, rating: null, available: false, hasOptions: false, featured: false },
+]
+const sizeGroup = (id: string, withDefault = true): OptionGroup => ({
+   id: CLASSIFY_GROUP_ID,
+  name: { ar: "Ø§Ù„Ø­Ø¬Ù…", en: "Size" },
+  type: "single",
+  required: true,
+  min: 1,
+  max: 1,
+  choices: [
+    { id: `${id}-s`, name: { ar: "ØµØºÙŠØ±", en: "Small" }, price: 0, isDefault: withDefault },
+    { id: `${id}-m`, name: { ar: "ÙˆØ³Ø·", en: "Medium" }, price: 1.5, isDefault: false },
+    { id: `${id}-l`, name: { ar: "ÙƒØ¨ÙŠØ±", en: "Large" }, price: 3, isDefault: false },
+  ],
+})
+
+const extrasGroup = (id: string): OptionGroup => ({
+  id: `${id}-extras`,
+  name: { ar: "Ø¥Ø¶Ø§ÙØ§Øª", en: "Extras" },
+  type: "multiple",
+  required: false,
+  min: 0,
+  max: 3,
+  choices: [
+    { id: `${id}-cheese`, name: { ar: "Ø¬Ø¨Ù†Ø© Ø²ÙŠØ§Ø¯Ø©", en: "Extra cheese" }, price: 1, isDefault: false },
+    { id: `${id}-bacon`, name: { ar: "Ù„Ø­Ù… Ù…Ù‚Ø¯Ø¯", en: "Bacon" }, price: 1.5, isDefault: false },
+    { id: `${id}-mushroom`, name: { ar: "ÙØ·Ø±", en: "Mushrooms" }, price: 1, isDefault: false },
+    { id: `${id}-jalapeno`, name: { ar: "Ù‡Ø§Ù„Ø¨ÙŠÙ†Ùˆ", en: "JalapeÃ±o" }, price: 0.5, isDefault: false },
+  ],
+})
+
+export const optionGroupsByProduct: Record<string, OptionGroup[]> = {
+  p1: [sizeGroup("p1"), extrasGroup("p1")],
+  p3: [sizeGroup("p3"), extrasGroup("p3")],
+  p4: [sizeGroup("p4", false), extrasGroup("p4")], // Ø¨Ø¯ÙˆÙ† Ø§Ø®ØªÙŠØ§Ø± Ø§ÙØªØ±Ø§Ø¶ÙŠ Ù„ØªØ¬Ø±Ø¨Ø© Ø§Ù„ØªØ­Ù‚Ù‚
+}
+
+===== where optionGroupsByProduct is used =====
+features\menu\components\ProductCard.tsx:26: if (product.hasOptions) {
+features\menu\menu.types.ts:31: hasOptions: boolean // أحجام أو إضافات، يحتاج صفحة المنتج
+mocks\handlers.ts:6: import { banners, optionGroupsByProduct, products } from "./menuData"
+mocks\handlers.ts:78: return HttpResponse.json({ ...product, optionGroups: optionGroupsByProduct[found.id] ?? [] })
+mocks\handlers.ts:116: const choices = (optionGroupsByProduct[product.id] ?? []).flatMap((g) => g.choices)
+mocks\menuData.ts:43: { ...base, id: "p1", categoryId: "c1", name: { ar: "برغر لحم كلاسيك", en: "Classic Beef Burger" }, description: { ar: "لحم بقري، جبنة، صلصة البيت", en: "Beef patty, cheese, house sauce" }, price: 8.5, badge: "bestseller", rating: { value: 4.8, count: 1200 }, hasOptions: true, featured: true },
+mocks\menuData.ts:44: { ...base, id: "p2", categoryId: "c1", name: { ar: "برغر دجاج مقرمش", en: "Crispy Chicken Burger" }, description: { ar: "دجاج مقرمش مع مايونيز وخس", en: "Crispy chicken, mayo and lettuce" }, price: 7.25, badge: "hot", rating: { value: 4.6, count: 640 }, hasOptions: false, featured: true },
+mocks\menuData.ts:45: { ...base, id: "p3", categoryId: "c2", name: { ar: "بيتزا مارغريتا", en: "Margherita Pizza" }, description: { ar: "جبنة موزاريلا وطماطم وريحان", en: "Mozzarella, tomato and basil" }, price: 9, badge: "popular", rating: { value: 4.7, count: 870 }, hasOptions: true, featured: true },
+mocks\menuData.ts:46: { ...base, id: "p4", categoryId: "c2", name: { ar: "بيتزا خضار", en: "Veggie Pizza" }, description: { ar: "فطر وفلفل وزيتون وذرة", en: "Mushrooms, peppers, olives and corn" }, price: 8.75, badge: null, rating: { value: 4.4, count: 210 }, hasOptions: true, featured: false },
+mocks\menuData.ts:47: { ...base, id: "p5", categoryId: "c3", name: { ar: "سلطة سيزر", en: "Caesar Salad" }, description: { ar: "خس رومين وجبنة بارميزان وصلصة سيزر", en: "Romaine, parmesan and Caesar dressing" }, price: 6.5, badge: "chefs_pick", rating: { value: 4.9, count: 456 }, hasOptions: false, featured: true },
+mocks\menuData.ts:48: { ...base, id: "p6", categoryId: "c3", name: { ar: "سلطة يونانية", en: "Greek Salad" }, description: { ar: "خيار وطماطم وجبنة فيتا وزيتون", en: "Cucumber, tomato, feta and olives" }, price: 6, badge: null, rating: { value: 4.3, count: 130 }, hasOptions: false, featured: false },
+mocks\menuData.ts:49: { ...base, id: "p7", categoryId: "c4", name: { ar: "ليموناضة بالنعناع", en: "Mint Lemonade" }, description: { ar: "ليمون طازج ونعناع وثلج", en: "Fresh lemon, mint and ice" }, price: 3, badge: "popular", rating: { value: 4.7, count: 920 }, hasOptions: false, featured: true },
+mocks\menuData.ts:50: { ...base, id: "p8", categoryId: "c4", name: { ar: "قهوة مثلجة", en: "Iced Coffee" }, description: { ar: "إسبريسو مع حليب وثلج", en: "Espresso with milk and ice" }, price: 3.75, badge: null, rating: { value: 4.5, count: 310 }, hasOptions: false, featured: false },
+mocks\menuData.ts:51: { ...base, id: "p9", categoryId: "c5", name: { ar: "براوني بالشوكولا", en: "Chocolate Brownie" }, description: { ar: "براوني دافئ مع صلصة الشوكولا", en: "Warm brownie with chocolate sauce" }, price: 4.5, badge: "new", rating: { value: 4.8, count: 540 }, hasOptions: false, featured: true },
+mocks\menuData.ts:52: { ...base, id: "p10", categoryId: "c5", name: { ar: "تشيز كيك", en: "Cheesecake" }, description: { ar: "تشيز كيك بالتوت", en: "Cheesecake with berries" }, price: 5, oldPrice: 6, badge: null, rating: { value: 4.6, count: 300 }, hasOptions: false, featured: false },
+mocks\menuData.ts:53: { ...base, id: "p11", categoryId: "c5", name: { ar: "كنافة بالجبنة", en: "Cheese Kunafa" }, description: { ar: "كنافة ناعمة بالجبنة والقطر", en: "Soft kunafa with cheese and syrup" }, price: 5.5, badge: null, rating: null, available: false, hasOptions: false, featured: false },
+mocks\menuData.ts:84: export const optionGroupsByProduct: Record<string, OptionGroup[]> = {
+mocks\productsData.ts:8: type StoredProduct = AdminProduct & Pick<MockProduct, "featured" | "badge" | "rating" | "hasOptions">
+mocks\productsData.ts:30: hasOptions: p.hasOptions,
+mocks\productsData.ts:57: hasOptions: p.hasOptions,
+mocks\productsData.ts:77: hasOptions: false,
+
+===== admin options keys in locales =====
+
+> locales\ar.json:9:    "options": "الأحجام والإضافات",
+  locales\ar.json:10:    "coupons": "الكوبونات",
+  locales\ar.json:11:    "banners": "البنرات والعروض",
+  locales\ar.json:12:    "tables": "الطاولات و QR",
+
+

@@ -1,15 +1,15 @@
 import type { AdminProduct, ProductInput } from "@/features/admin"
 import { persistentList } from "./db"
-import { products, type MockProduct } from "./menuData"
+import { optionGroupsByProduct, products, type MockProduct } from "./menuData"
 
 export type { ProductInput }
 
 // الحقول اللي بيحتاجها الزبون وما بيعدّلها الأدمن بتضل محفوظة مع المنتج
-type StoredProduct = AdminProduct & Pick<MockProduct, "featured" | "badge" | "rating" | "hasOptions">
+type StoredProduct = AdminProduct & Pick<MockProduct, "featured" | "badge" | "rating">
 
 // سعر صرف لبيانات التجربة فقط، حتى يكون لكل منتج سعر بالليرة
 const SAMPLE_RATE = 13000
-const toSyp = (usd: number) => Math.round((usd * SAMPLE_RATE) / 500) * 500
+export const toSyp = (usd: number) => Math.round((usd * SAMPLE_RATE) / 500) * 500
 
 // نسخة من المنتجات الأصلية قبل أي تعديل (منها بتجي القيم الأولية)
 const original = products.map((product) => ({ ...product }))
@@ -27,7 +27,6 @@ const seed = (): StoredProduct[] =>
     featured: p.featured,
     badge: p.badge,
     rating: p.rating,
-    hasOptions: p.hasOptions,
   }))
 
 const db = persistentList<StoredProduct>("products", seed)
@@ -54,7 +53,7 @@ const toPublic = (p: StoredProduct): MockProduct => ({
   available: p.isAvailable,
   badge: p.badge,
   rating: p.rating,
-  hasOptions: p.hasOptions,
+  hasOptions: (optionGroupsByProduct[p.id]?.length ?? 0) > 0,
   featured: p.featured,
 })
 
@@ -74,7 +73,6 @@ export const productsDb = {
       featured: false,
       badge: null,
       rating: null,
-      hasOptions: false,
     }
     db.list = [...db.list, created]
     syncPublic()
@@ -94,4 +92,7 @@ export const productsDb = {
     db.list = db.list.filter((p) => p.id !== id)
     syncPublic()
   },
+
+  // بعد تعديل الخيارات: hasOptions بيتحسب من جديد
+  refresh: syncPublic,
 }
