@@ -559,5 +559,37 @@
       "oneDefault": "Only one choice can be selected by default",
       "noChoices": "Add at least one choice"
     }
-  }
+  },
+    "plans": {
+    "title": "Plans",
+    "subtitle": "Create the subscription plans and edit their prices and duration.",
+    "add": "Add plan",
+    "empty": "No plans yet",
+    "emptyHint": "Press \"Add plan\" to start.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "duration": "Duration in months: {{months}}",
+    "toast": {
+      "added": "Plan added",
+      "updated": "Plan updated"
+    },
+    "form": {
+      "addTitle": "Add plan",
+      "editTitle": "Edit plan",
+      "name": "Plan name",
+      "type": "Plan type",
+      "typeHint": "Must match the type the backend uses",
+      "description": "Description",
+      "price": "Price",
+      "months": "Duration in months",
+      "active": "Active",
+      "activeHint": "An inactive plan can't be picked for a new subscription"
+    },
+    "errors": {
+      "generic": "Something went wrong, try again",
+      "usd": "Enter a valid amount in dollars (up to two decimals)",
+      "syp": "Enter a valid amount in pounds (a whole number)",
+      "months": "Enter a whole number of months between 1 and 120"
+    }
+  },
 }
