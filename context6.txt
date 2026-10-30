@@ -1,0 +1,66 @@
+﻿===== features folders =====
+admin
+auth
+cart
+checkout
+menu
+superadmin
+tenant
+theme
+
+===== mocks folder =====
+accountsData.ts
+adminHandlers.ts
+appearanceData.ts
+browser.ts
+categoriesData.ts
+data.ts
+db.ts
+handlers.ts
+menuData.ts
+optionsData.ts
+ordersData.ts
+productsData.ts
+settingsData.ts
+tablesData.ts
+
+===== where handlers are registered =====
+mocks\adminHandlers.ts:14: export const adminHandlers = [
+mocks\browser.ts:1: import { setupWorker } from "msw/browser"
+mocks\browser.ts:2: import { handlers } from "./handlers"
+mocks\browser.ts:4: export const worker = setupWorker(...handlers)
+mocks\handlers.ts:3: import { adminHandlers } from "./adminHandlers"
+mocks\handlers.ts:15: export const handlers = [
+mocks\handlers.ts:162: ...adminHandlers,
+mocks\optionsData.ts:79: // handlers الزبون بتقرأ من optionGroupsByProduct، فمنحدّثها من مكانها
+mocks\productsData.ts:60: // handlers الزبون بتقرأ من المصفوفة products، فمنحدّثها من مكانها بدل ما نعدّل handlers
+
+===== guards =====
+RequireAuth.tsx
+RequireFeature.tsx
+SubscriptionGate.tsx
+
+===== PlaceholderPage =====
+import { useTranslation } from "react-i18next"
+
+export function PlaceholderPage({ titleKey }: { titleKey: string }) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="space-y-2">
+      <h1 className="text-xl font-bold">{t(titleKey)}</h1>
+      <p className="text-muted-foreground">{t("placeholder.soon")}</p>
+    </div>
+  )
+}
+
+===== DataTable.tsx (first 60 lines) =====
+
+===== nav keys for super admin in ar.json =====
+
+locales\ar.json:20:    "restaurants": "المطاعم",
+locales\ar.json:21:    "plans": "الباقات",
+locales\ar.json:22:    "subscriptions": "الاشتراكات",
+locales\ar.json:53:  "layout": { "superPanel": "إدارة المنصة" },
+
+

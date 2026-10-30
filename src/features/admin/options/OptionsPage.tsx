@@ -1,27 +1,40 @@
+import { useState } from "react"
 import { SlidersHorizontal } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
-import { Label } from "@/components/ui/label"
 import { useLang } from "@/hooks/useLang"
+import { useAdminCategories } from "../categories/categories.api"
 import { useAdminProducts } from "../products/products.api"
 import { OptionsEditor } from "./OptionsEditor"
+import { ProductPicker, SelectedProduct } from "./ProductPicker"
 import { useProductOptions } from "./options.api"
-
-const SELECT =
-  "h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
 
 export function OptionsPage() {
   const { t } = useTranslation()
   const lang = useLang()
   const [params, setParams] = useSearchParams()
+  const [picking, setPicking] = useState(false)
   const productsQuery = useAdminProducts()
+  const categoriesQuery = useAdminCategories()
 
   const products = productsQuery.data ?? []
-  const requested = params.get("product") ?? ""
-  const productId = products.some((product) => product.id === requested) ? requested : ""
+  const selected = products.find((product) => product.id === params.get("product"))
+  const productId = selected?.id ?? ""
   const optionsQuery = useProductOptions(productId)
+  const showPicker = !selected || picking
+
+  const categoryName = (id: string) => {
+    if (!categoriesQuery.data) return ""
+    const category = categoriesQuery.data.find((c) => c.id === id)
+    return category ? category.name[lang] || category.name.ar : t("products.noCategory")
+  }
+
+  function choose(id: string) {
+    setParams({ product: id }, { replace: true })
+    setPicking(false)
+  }
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
@@ -39,32 +52,32 @@ export function OptionsPage() {
         />
       ) : (
         <>
-          <div className="space-y-1.5">
-            <Label htmlFor="optionsProduct">{t("options.product")}</Label>
-            <select
-              id="optionsProduct"
-              className={SELECT}
-              value={productId}
-              onChange={(e) => setParams(e.target.value ? { product: e.target.value } : {}, { replace: true })}
-            >
-              <option value="">{t("options.chooseProduct")}</option>
-              {products.map((product) => (
-                <option key={product.id} value={product.id}>
-                  {product.name[lang] || product.name.ar}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {productId === "" ? (
-            <EmptyState icon={SlidersHorizontal} title={t("options.pick")} />
-          ) : optionsQuery.isPending ? (
-            <div className="h-48 animate-pulse rounded-3xl bg-muted" />
-          ) : optionsQuery.isError ? (
-            <EmptyState title={t("options.loadError")} />
+          {showPicker ? (
+            <>
+              {!selected && <p className="text-sm text-muted-foreground">{t("options.pick")}</p>}
+              <ProductPicker
+                products={products}
+                selectedId={productId}
+                categoryName={categoryName}
+                onSelect={choose}
+              />
+            </>
           ) : (
-            <OptionsEditor key={productId} productId={productId} initial={optionsQuery.data} />
+            <SelectedProduct
+              product={selected}
+              categoryName={categoryName(selected.categoryId)}
+              onChange={() => setPicking(true)}
+            />
           )}
+
+          {selected && !picking &&
+            (optionsQuery.isPending ? (
+              <div className="h-48 animate-pulse rounded-3xl bg-muted" />
+            ) : optionsQuery.isError ? (
+              <EmptyState title={t("options.loadError")} />
+            ) : (
+              <OptionsEditor key={productId} productId={productId} initial={optionsQuery.data} />
+            ))}
         </>
       )}
     </div>

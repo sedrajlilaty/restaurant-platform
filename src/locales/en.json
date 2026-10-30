@@ -506,7 +506,9 @@
     "options": {
     "title": "Sizes and extras",
     "subtitle": "Pick a product and edit its sizes and groups of extras.",
-    "product": "Product",
+    "search": "Search for a product",
+    "change": "Change product",
+    "noMatch": "No matching products",    "product": "Product",
     "chooseProduct": "Choose a product",
     "pick": "Pick a product to edit its sizes and extras",
     "noProducts": "Add a product first",

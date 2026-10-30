@@ -9,6 +9,7 @@ import type { StoreSettings } from "@/features/tenant"
 import { settingsDb } from "./settingsData"
 import { ordersDb } from "./ordersData"
 import { findAccount } from "./accountsData"
+import { superHandlers } from "./superHandlers"
 const money = (value: number) => Math.round(value * 100) / 100
 let orderCounter = 1000
 
@@ -159,7 +160,8 @@ export const handlers = [
     return HttpResponse.json(order, { status: 201 })
   }),
  
-  ...adminHandlers,
+    ...adminHandlers,
+  ...superHandlers,
     // رئيسية الأدمن
   
 ]
