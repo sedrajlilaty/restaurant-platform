@@ -569,7 +569,13 @@
     "active": "Active",
     "inactive": "Inactive",
     "duration": "Duration in months: {{months}}",
-    "toast": {
+    "perMonth": "≈ {{price}} per month",
+    "addCard": "Add a new plan",
+    "stats": {
+      "total": "Total plans",
+      "active": "Active plans",
+      "cheapest": "Lowest monthly price"
+    },    "toast": {
       "added": "Plan added",
       "updated": "Plan updated"
     },
