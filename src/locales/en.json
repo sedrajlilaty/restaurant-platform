@@ -94,6 +94,10 @@
     "soon": "This page is under construction"
   },
   "menu": {
+    "greetingMorning": "Good morning",
+"greetingEvening": "Good evening",
+"heroQuestion": "What are you craving",
+"heroWord": "{{name}}?",
     "searchPlaceholder": "Search for a dish...",
     "popular": "Popular picks",
     "all": "All",

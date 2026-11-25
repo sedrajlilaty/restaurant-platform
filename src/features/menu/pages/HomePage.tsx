@@ -4,19 +4,20 @@ import { Search } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { Input } from "@/components/ui/input"
-import { BannerSlider } from "../components/BannerSlider"
+import { useLocalized } from "@/hooks/useLocalized"
 import { CategoryTabs } from "../components/CategoryTabs"
+import { GreetingHero } from "../components/GreetingHero"
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard"
-import { useBanners, useCategories, useProducts } from "../menu.api"
+import { useCategories, useProducts } from "../menu.api"
 
 const GRID = "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 
 export function HomePage() {
   const { t } = useTranslation()
+  const l = useLocalized()
   const navigate = useNavigate()
   const [query, setQuery] = useState("")
 
-  const banners = useBanners()
   const categories = useCategories()
   const products = useProducts({ limit: 12 })
 
@@ -39,10 +40,10 @@ export function HomePage() {
         />
       </form>
 
-      {banners.isPending ? (
-        <div className="h-48 animate-pulse rounded-3xl bg-muted md:h-72" />
+      {categories.isPending ? (
+        <div className="h-44 animate-pulse rounded-3xl bg-muted md:h-56" />
       ) : (
-        banners.data && <BannerSlider banners={banners.data} />
+        <GreetingHero words={(categories.data ?? []).map((c) => l(c.name))} />
       )}
 
       {categories.data && (

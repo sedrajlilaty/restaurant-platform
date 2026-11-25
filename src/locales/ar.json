@@ -64,6 +64,10 @@
   "notFound": { "title": "الصفحة غير موجودة", "back": "العودة للرئيسية" },
   "placeholder": { "soon": "هذه الصفحة قيد البناء" },
   "menu": {
+   "greetingMorning": "صباح الخير",
+"greetingEvening": "مساء الخير",
+"heroQuestion": "شو بدك اليوم",
+"heroWord": "{{name}}؟", 
   "searchPlaceholder": "ابحث عن طبق...",
   "popular": "الأكثر طلباً",
   "all": "الكل",
