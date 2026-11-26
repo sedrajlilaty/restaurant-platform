@@ -3,7 +3,7 @@ import { Clock, ExternalLink, MapPin, MessageCircle, Phone, type LucideIcon } fr
 import { useTranslation } from "react-i18next"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { RestaurantLogo } from "@/components/shared/RestaurantLogo"
-import { Reveal } from "@/components/shared/Reveal"
+ import { Reveal } from "@/components/shared/Reveal"
 import { useRestaurant, useStoreSettings } from "@/features/tenant"
 import { useLang } from "@/hooks/useLang"
 import { cn } from "@/lib/utils"

@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router"
 import { Check, Plus, Star, UtensilsCrossed } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { buildLineId, useCart } from "@/features/cart"
+import { flyToCart } from "@/features/cart/flyToCart"
 import { useLocalized } from "@/hooks/useLocalized"
 import { usePrice } from "@/hooks/usePrice"
 import { cn } from "@/lib/utils"
@@ -15,6 +16,7 @@ export function ProductCard({ product }: { product: Product }) {
   const navigate = useNavigate()
   const add = useCart((s) => s.add)
   const [added, setAdded] = useState(false)
+  const cardRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!added) return
@@ -22,12 +24,8 @@ export function ProductCard({ product }: { product: Product }) {
     return () => window.clearTimeout(id)
   }, [added])
 
-  function handleAdd() {
-    if (product.hasOptions) {
-      navigate(`/product/${product.id}`)
-      return
-    }
-        add({
+  function commitAdd() {
+    add({
       id: buildLineId(product.id, []),
       productId: product.id,
       name: product.name,
@@ -38,15 +36,32 @@ export function ProductCard({ product }: { product: Product }) {
     setAdded(true)
   }
 
+  function handleAdd() {
+    if (product.hasOptions) {
+      navigate(`/product/${product.id}`)
+      return
+    }
+
+    const card = cardRef.current
+    if (!card) {
+      commitAdd()
+      return
+    }
+
+    const source = card.querySelector<HTMLElement>("[data-fly-source]") ?? card
+    void flyToCart(source, product.imageUrl).then(commitAdd)
+  }
+
   return (
     <article
+      ref={cardRef}
       className={cn(
         "flex flex-col overflow-hidden rounded-3xl border bg-card shadow-sm",
         !product.available && "opacity-70",
       )}
     >
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative aspect-[4/3] bg-muted">
+        <div data-fly-source className="relative aspect-[4/3] bg-muted">
           {product.imageUrl ? (
             <img src={product.imageUrl} alt="" loading="lazy" className="size-full object-cover" />
           ) : (
@@ -92,7 +107,11 @@ export function ProductCard({ product }: { product: Product }) {
           aria-label={t("menu.addToCart")}
           className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm transition-transform active:scale-90 disabled:opacity-40"
         >
-          {added ? <Check className="size-4" /> : <Plus className="size-4" />}
+          {added ? (
+            <Check key="check" className="size-4 animate-in zoom-in-50 duration-200 motion-reduce:animate-none" />
+          ) : (
+            <Plus key="plus" className="size-4" />
+          )}
         </button>
       </div>
     </article>
