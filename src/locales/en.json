@@ -311,6 +311,12 @@
       "url": "Enter a valid link starting with https://"
     },
     "info": {
+      "groups": {
+  "brand": "Branding",
+  "about": "About the restaurant",
+  "contact": "Address and contact",
+  "site": "Site"
+},
       "title": "Restaurant info",
       "desc": "Shown on the About page and in the site header.",
       "logo": "Logo",
