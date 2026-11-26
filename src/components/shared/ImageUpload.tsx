@@ -9,13 +9,15 @@ import { cn } from "@/lib/utils"
 type Props = {
   value: string | null
   onChange: (url: string | null) => void
+  variant?: "square" | "wide"
   className?: string
 }
 
-export function ImageUpload({ value, onChange, className }: Props) {
+export function ImageUpload({ value, onChange, variant = "square", className }: Props) {
   const { t } = useTranslation()
   const inputRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const wide = variant === "wide"
 
   async function handleFile(file: File) {
     if (!IMAGE_TYPES.includes(file.type)) {
@@ -40,14 +42,21 @@ export function ImageUpload({ value, onChange, className }: Props) {
   const choose = () => inputRef.current?.click()
 
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn(wide ? "space-y-3" : "flex items-center gap-3", className)}>
       <button
         type="button"
         onClick={choose}
         disabled={uploading}
-        className="relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl border border-dashed bg-muted text-muted-foreground"
+        className={cn(
+          "group relative grid shrink-0 place-items-center overflow-hidden rounded-2xl border border-dashed bg-muted text-muted-foreground outline-none transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+          wide ? "aspect-[8/3] w-full" : "size-20",
+        )}
       >
-        {value ? <img src={value} alt="" className="size-full object-cover" /> : <ImagePlus className="size-6" />}
+        {value ? (
+          <img src={value} alt="" className="size-full object-cover" />
+        ) : (
+          <ImagePlus className="size-6 transition-transform duration-200 group-hover:scale-110 motion-reduce:transition-none" />
+        )}
         {uploading && (
           <span className="absolute inset-0 grid place-items-center bg-background/70">
             <Loader2 className="size-5 animate-spin" />
@@ -55,7 +64,7 @@ export function ImageUpload({ value, onChange, className }: Props) {
         )}
       </button>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <div className="flex gap-2">
           <Button type="button" variant="outline" size="sm" onClick={choose} disabled={uploading}>
             {value ? t("upload.change") : t("upload.choose")}
@@ -67,12 +76,13 @@ export function ImageUpload({ value, onChange, className }: Props) {
               size="icon"
               onClick={() => onChange(null)}
               aria-label={t("upload.remove")}
+              className="text-destructive"
             >
               <Trash2 className="size-4" />
             </Button>
           )}
         </div>
-        <p className="text-xs text-muted-foreground">{t("upload.hint")}</p>
+        <p className="text-xs leading-relaxed text-muted-foreground">{t("upload.hint")}</p>
       </div>
 
       <input
