@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { NavLink, Outlet } from "react-router"
+import { useLayoutEffect, useRef, useState } from "react"
+import { NavLink, Outlet, useLocation } from "react-router"
 import { useTranslation } from "react-i18next"
 import { differenceInCalendarDays } from "date-fns"
 import {
@@ -33,6 +33,7 @@ import { useAuth } from "@/features/auth/auth.store"
 import type { FeatureKey } from "@/features/tenant/tenant.types"
 import { useRestaurant } from "@/features/tenant/useTenant"
 import { useDirection } from "@/hooks/useDirection"
+import { ADMIN_CONTAINER } from "@/lib/layout"
 import { cn } from "@/lib/utils"
 import { ModeToggle } from "@/features/tenant"
 
@@ -76,6 +77,9 @@ const GROUPS: NavGroup[] = [
   },
 ]
 
+const SIDEBAR_GRADIENT =
+  "linear-gradient(to bottom, var(--sidebar), color-mix(in oklab, var(--primary) 16%, var(--sidebar)))"
+
 function SidebarContent({
   name,
   logoUrl,
@@ -88,14 +92,69 @@ function SidebarContent({
   onNavigate?: () => void
 }) {
   const { t } = useTranslation()
+  const { pathname } = useLocation()
+  const navRef = useRef<HTMLElement>(null)
+  const indicatorRef = useRef<HTMLSpanElement>(null)
+  const placed = useRef(false)
+
+  useLayoutEffect(() => {
+    const nav = navRef.current
+    const indicator = indicatorRef.current
+    if (!nav || !indicator) return
+
+    let cancelled = false
+
+    const place = () => {
+      const active = nav.querySelector<HTMLElement>('a[aria-current="page"]')
+      if (!active) {
+        indicator.style.opacity = "0"
+        return
+      }
+
+      const first = !placed.current
+      if (first) indicator.style.transition = "none"
+
+      indicator.style.width = `${active.offsetWidth}px`
+      indicator.style.height = `${active.offsetHeight}px`
+      indicator.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`
+      indicator.style.opacity = "1"
+
+      if (first) {
+        void indicator.offsetWidth
+        indicator.style.transition = ""
+        placed.current = true
+      }
+    }
+
+    place()
+
+    const observer = new ResizeObserver(place)
+    observer.observe(nav)
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) place()
+    })
+
+    return () => {
+      cancelled = true
+      observer.disconnect()
+    }
+  }, [pathname])
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col rounded-[inherit]" style={{ backgroundImage: SIDEBAR_GRADIENT }}>
       <div className="flex items-center gap-3 px-5 py-5">
         <RestaurantLogo name={name} logoUrl={logoUrl} />
         <span className="truncate text-lg font-bold">{name}</span>
       </div>
-      <nav className="flex-1 overflow-y-auto px-3 pb-4">
+      <nav
+        ref={navRef}
+        className="relative flex-1 overflow-y-auto px-3 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%_-_20px),transparent)] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <span
+          ref={indicatorRef}
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-0 z-0 rounded-2xl bg-[var(--sidebar-primary)] opacity-0 shadow-sm transition-[transform,width,height,opacity] duration-300 ease-out motion-reduce:transition-none"
+        />
         {GROUPS.map((group, index) => (
           <div key={index}>
             {group.label && <p className="px-3 pb-1 pt-4 text-xs font-medium opacity-60">{t(group.label)}</p>}
@@ -110,14 +169,12 @@ function SidebarContent({
                     onClick={onNavigate}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-[var(--sidebar-primary)] text-[var(--sidebar-primary-foreground)] shadow-sm"
-                          : "hover:bg-[var(--sidebar-accent)]",
+                        "group relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors duration-200",
+                        isActive ? "text-[var(--sidebar-primary-foreground)]" : "hover:bg-[var(--sidebar-accent)]",
                       )
                     }
                   >
-                    <item.icon className="size-4 shrink-0" />
+                    <item.icon className="size-4 shrink-0 transition-transform duration-200 group-hover:-rotate-6 group-hover:scale-110 motion-reduce:transition-none" />
                     <span className="flex-1">{t(item.label)}</span>
                     {locked && <Lock className="size-3.5 opacity-60" />}
                   </NavLink>
@@ -163,10 +220,8 @@ export function AdminLayout() {
               <span className="truncate font-bold md:hidden">{name}</span>
             </div>
             <div className="flex items-center gap-1">
-              <div className="flex justify-end gap-1">
-  <ModeToggle />
-  <LanguageSwitcher />
-</div>
+              <ModeToggle />
+              <LanguageSwitcher />
               <Button variant="ghost" size="sm" className="gap-1" onClick={logout}>
                 <LogOut className="size-4" />
                 <span className="hidden sm:inline">{t("common.logout")}</span>
@@ -176,7 +231,7 @@ export function AdminLayout() {
 
           {daysLeft <= 7 && <SubscriptionBanner daysLeft={daysLeft} />}
           <main className="flex-1 px-4 pb-32 md:px-0 md:pb-6">
-            <div className="mx-auto w-full max-w-6xl">
+            <div className={ADMIN_CONTAINER}>
               <Outlet />
             </div>
           </main>

@@ -18,7 +18,7 @@ export function SettingsPage() {
   const query = useAdminSettings()
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="space-y-5">
       <PageHeader title={t("settings.title")} description={t("settings.subtitle")} />
 
       {query.isPending ? (

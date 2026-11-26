@@ -37,7 +37,7 @@ export function OptionsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="space-y-5">
       <PageHeader title={t("options.title")} description={t("options.subtitle")} />
 
       {productsQuery.isPending ? (

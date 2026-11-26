@@ -143,7 +143,7 @@ export function DashboardPage() {
   ]
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="space-y-5">
       <Reveal>
         <PageHeader
           title={t("dashboard.welcome", { name: userName ?? "" })}

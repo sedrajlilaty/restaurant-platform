@@ -130,7 +130,7 @@ export function CategoriesPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-5">
+    <div className="space-y-5">
       <PageHeader
         title={t("categories.title")}
         description={t("categories.subtitle")}
