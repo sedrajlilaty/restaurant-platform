@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { EmptyState } from "@/components/shared/EmptyState"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { Reveal } from "@/components/shared/Reveal"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -16,9 +17,11 @@ import { ProductForm } from "./ProductForm"
 import { useAdminProducts, useDeleteProduct, useUpdateProduct } from "./products.api"
 import type { AdminProduct } from "./products.types"
 
-type RowProps = { product: AdminProduct; categoryName: string; onEdit: () => void; onDelete: () => void }
+const GRID = "grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3"
 
-function ProductRow({ product, categoryName, onEdit, onDelete }: RowProps) {
+type CardProps = { product: AdminProduct; categoryName: string; onEdit: () => void; onDelete: () => void }
+
+function ProductCard({ product, categoryName, onEdit, onDelete }: CardProps) {
   const { t } = useTranslation()
   const lang = useLang()
   const update = useUpdateProduct()
@@ -27,64 +30,95 @@ function ProductRow({ product, categoryName, onEdit, onDelete }: RowProps) {
   const secondary = lang === "ar" ? product.name.en : product.name.ar
 
   return (
-    <li
+    <article
       className={cn(
-        "flex items-center gap-3 rounded-3xl border bg-card p-3 shadow-sm",
-        !product.isAvailable && "opacity-70",
+        "group flex h-full flex-col overflow-hidden rounded-3xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+        !product.isAvailable && "opacity-80",
       )}
     >
-      <div className="size-14 shrink-0 overflow-hidden rounded-2xl bg-muted">
+      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {product.imageUrl ? (
-          <img src={product.imageUrl} alt="" className="size-full object-cover" />
+          <img
+            src={product.imageUrl}
+            alt=""
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+          />
         ) : (
           <span className="grid size-full place-items-center text-muted-foreground">
-            <UtensilsCrossed className="size-5" />
+            <UtensilsCrossed className="size-8" />
           </span>
         )}
+
+        <span className="absolute start-3 top-3 max-w-[70%] truncate rounded-full bg-card/90 px-3 py-1 text-xs font-medium shadow-sm backdrop-blur">
+          {categoryName}
+        </span>
+
+        <div className="absolute end-3 top-3 flex gap-1.5">
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={onEdit}
+            aria-label={t("common.edit")}
+            className="rounded-full bg-card/90 shadow-sm backdrop-blur hover:bg-card"
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="icon"
+            onClick={onDelete}
+            aria-label={t("common.delete")}
+            className="rounded-full bg-card/90 text-destructive shadow-sm backdrop-blur hover:bg-destructive hover:text-white"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
       </div>
 
-      <div className="min-w-0 flex-1 space-y-0.5">
-        <p className="truncate font-semibold">{primary}</p>
-        <p className="truncate text-xs text-muted-foreground">
-          {secondary} · {categoryName}
-        </p>
-        <p className="flex flex-wrap items-center gap-x-2 text-sm">
-          <span className="font-medium text-primary">{formatPrice(product.price.usd, "USD", lang)}</span>
-          <span className="text-muted-foreground">{formatPrice(product.price.syp, "SYP", lang)}</span>
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <div className="min-w-0 space-y-0.5">
+          <h3 className="truncate font-semibold">{primary}</h3>
+          <p className="truncate text-xs text-muted-foreground">{secondary}</p>
+        </div>
+
+        <p className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <span className="text-lg font-bold text-primary">{formatPrice(product.price.usd, "USD", lang)}</span>
+          <span className="text-sm text-muted-foreground">{formatPrice(product.price.syp, "SYP", lang)}</span>
           {product.oldPrice && (
             <span className="text-xs text-muted-foreground line-through">
               {formatPrice(product.oldPrice.usd, "USD", lang)}
             </span>
           )}
         </p>
-      </div>
 
-      <div className="flex items-center gap-2">
-        <Switch
-          aria-label={t("products.form.available")}
-          checked={product.isAvailable}
-          disabled={update.isPending}
-          onCheckedChange={(checked) =>
-            update.mutate(
-              { id: product.id, isAvailable: checked },
-              { onError: () => toast.error(t("products.errors.generic")) },
-            )
-          }
-        />
-        <span className="hidden w-20 text-xs text-muted-foreground sm:inline">
-          {product.isAvailable ? t("products.available") : t("products.unavailable")}
-        </span>
+        <div className="mt-auto flex items-center justify-between gap-2 border-t pt-3">
+          <span
+            className={cn(
+              "flex items-center gap-2 text-sm",
+              product.isAvailable ? "font-medium text-foreground" : "text-muted-foreground",
+            )}
+          >
+            <span
+              aria-hidden="true"
+              className={cn("size-2 rounded-full", product.isAvailable ? "bg-primary" : "bg-muted-foreground/40")}
+            />
+            {product.isAvailable ? t("products.available") : t("products.unavailable")}
+          </span>
+          <Switch
+            aria-label={t("products.form.available")}
+            checked={product.isAvailable}
+            disabled={update.isPending}
+            onCheckedChange={(checked) =>
+              update.mutate(
+                { id: product.id, isAvailable: checked },
+                { onError: () => toast.error(t("products.errors.generic")) },
+              )
+            }
+          />
+        </div>
       </div>
-
-      <div className="flex">
-        <Button variant="ghost" size="icon" onClick={onEdit} aria-label={t("common.edit")}>
-          <Pencil className="size-4" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={onDelete} aria-label={t("common.delete")} className="text-destructive">
-          <Trash2 className="size-4" />
-        </Button>
-      </div>
-    </li>
+    </article>
   )
 }
 
@@ -155,7 +189,7 @@ export function ProductsPage() {
   ]
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
         title={t("products.title")}
         description={t("products.subtitle")}
@@ -168,9 +202,9 @@ export function ProductsPage() {
       />
 
       {pending ? (
-        <div className="space-y-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-[88px] animate-pulse rounded-3xl bg-muted" />
+        <div className={GRID}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-72 animate-pulse rounded-3xl bg-muted" />
           ))}
         </div>
       ) : failed ? (
@@ -184,17 +218,17 @@ export function ProductsPage() {
       ) : (
         <>
           <div className="relative">
-            <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute start-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("products.search")}
               aria-label={t("products.search")}
-              className="ps-9"
+              className="h-11 rounded-full bg-card ps-11 shadow-sm"
             />
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 [scrollbar-width:none]">
             {chips.map((chip) => (
               <button
                 key={chip.id}
@@ -202,10 +236,10 @@ export function ProductsPage() {
                 aria-pressed={categoryId === chip.id}
                 onClick={() => setCategoryId(chip.id)}
                 className={cn(
-                  "shrink-0 rounded-full px-4 py-1.5 text-sm transition-colors",
+                  "shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition-all duration-200 active:scale-95 motion-reduce:transition-none",
                   categoryId === chip.id
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-muted-foreground hover:bg-muted/70",
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                    : "bg-card text-foreground hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md motion-reduce:hover:translate-y-0",
                 )}
               >
                 {chip.label}
@@ -224,15 +258,18 @@ export function ProductsPage() {
               }
             />
           ) : (
-            <ul className="space-y-2">
-              {items.map((product) => (
-                <ProductRow
-                  key={product.id}
-                  product={product}
-                  categoryName={categoryName(product.categoryId)}
-                  onEdit={() => setDialog({ product })}
-                  onDelete={() => setToDelete(product)}
-                />
+            <ul key={`${categoryId}|${query}`} className={GRID}>
+              {items.map((product, i) => (
+                <li key={product.id}>
+                  <Reveal index={Math.min(i, 8)} step={60} className="h-full">
+                    <ProductCard
+                      product={product}
+                      categoryName={categoryName(product.categoryId)}
+                      onEdit={() => setDialog({ product })}
+                      onDelete={() => setToDelete(product)}
+                    />
+                  </Reveal>
+                </li>
               ))}
             </ul>
           )}
