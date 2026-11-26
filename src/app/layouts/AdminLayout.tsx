@@ -169,8 +169,8 @@ function SidebarContent({
                     onClick={onNavigate}
                     className={({ isActive }) =>
                       cn(
-                        "group relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-colors duration-200",
-                        isActive ? "text-[var(--sidebar-primary-foreground)]" : "hover:bg-[var(--sidebar-accent)]",
+                        "group relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition-all duration-200 motion-reduce:transition-none",
+                        isActive ? "text-[var(--sidebar-primary-foreground)]" : "hover:bg-primary/15 hover:text-primary hover:shadow-sm ltr:hover:translate-x-1 rtl:hover:-translate-x-1 motion-reduce:hover:translate-x-0",
                       )
                     }
                   >
