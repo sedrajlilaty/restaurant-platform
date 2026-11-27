@@ -9,12 +9,14 @@ import { useLocalized } from "@/hooks/useLocalized"
 import { CategoryTabs } from "../components/CategoryTabs"
 import { GreetingHero, type HeroSlide } from "../components/GreetingHero"
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard"
-import { useCategories, useProducts } from "../menu.api"
+import { useBanners, useCategories, useProducts } from "../menu.api"
 
 const GRID = "grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:grid-cols-5"
 
 const CARD_HOVER =
   "h-full transition-transform duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&>*]:h-full [&>*]:transition-shadow [&>*]:duration-300 hover:[&>*]:shadow-xl"
+
+const MAX_SLIDES = 6
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -22,14 +24,33 @@ export function HomePage() {
   const navigate = useNavigate()
   const [query, setQuery] = useState("")
 
+  const banners = useBanners()
   const categories = useCategories()
   const products = useProducts({ limit: 12 })
 
-  // صور الأصناف الأكثر طلباً يلي بيرفعها صاحب المطعم لكل صنف
-  const slides: HeroSlide[] = (products.data?.items ?? [])
+  // العروض يلي بيضيفها صاحب المطعم أولاً، وبعدها صور الأصناف الأكثر طلباً
+  const offerSlides: HeroSlide[] = (banners.data ?? [])
+    .filter((banner) => banner.imageUrl)
+    .map((banner) => ({
+      id: `offer-${banner.id}`,
+      kind: "offer" as const,
+      imageUrl: banner.imageUrl as string,
+      title: l(banner.title),
+      subtitle: banner.subtitle ? l(banner.subtitle) : undefined,
+      to: banner.ctaLink ?? undefined,
+    }))
+
+  const popularSlides: HeroSlide[] = (products.data?.items ?? [])
     .filter((product) => product.available && product.imageUrl)
-    .slice(0, 5)
-    .map((product) => ({ id: product.id, imageUrl: product.imageUrl as string, title: l(product.name) }))
+    .map((product) => ({
+      id: `popular-${product.id}`,
+      kind: "popular" as const,
+      imageUrl: product.imageUrl as string,
+      title: l(product.name),
+      to: `/product/${product.id}`,
+    }))
+
+  const slides = [...offerSlides, ...popularSlides].slice(0, MAX_SLIDES)
 
   function submitSearch(e: FormEvent) {
     e.preventDefault()

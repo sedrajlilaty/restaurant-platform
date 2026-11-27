@@ -64,6 +64,7 @@
   "notFound": { "title": "الصفحة غير موجودة", "back": "العودة للرئيسية" },
   "placeholder": { "soon": "هذه الصفحة قيد البناء" },
   "menu": {
+    "offer": "عرض",
    "greetingMorning": "صباح الخير",
 "greetingEvening": "مساء الخير",
 "heroQuestion": "شو بدك اليوم",

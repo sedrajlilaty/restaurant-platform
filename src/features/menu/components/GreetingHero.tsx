@@ -1,12 +1,39 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { Link } from "react-router"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import "./greeting-hero.css"
 
-export type HeroSlide = { id: string; imageUrl: string; title: string }
+export type HeroSlide = {
+  id: string
+  kind: "offer" | "popular"
+  imageUrl: string
+  title: string
+  subtitle?: string
+  to?: string
+}
 
 type Props = { words: string[]; slides: HeroSlide[] }
+
+type WrapperProps = { to?: string; tabIndex: number; className: string; children: ReactNode }
+
+function SlideWrapper({ to, tabIndex, className, children }: WrapperProps) {
+  if (!to) return <div className={className}>{children}</div>
+
+  if (/^https?:\/\//i.test(to)) {
+    return (
+      <a href={to} target="_blank" rel="noopener noreferrer" tabIndex={tabIndex} className={className}>
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <Link to={to} tabIndex={tabIndex} className={className}>
+      {children}
+    </Link>
+  )
+}
 
 export function GreetingHero({ words, slides }: Props) {
   const { t } = useTranslation()
@@ -61,25 +88,32 @@ export function GreetingHero({ words, slides }: Props) {
           onBlur={() => setPaused(false)}
         >
           {slides.map((slide, i) => (
-            <Link
+            <SlideWrapper
               key={slide.id}
-              to={`/product/${slide.id}`}
+              to={slide.to}
               tabIndex={i === current ? 0 : -1}
-              aria-hidden={i !== current}
               className={cn(
                 "absolute inset-0 block overflow-hidden transition-opacity duration-700 motion-reduce:transition-none",
                 i === current ? "hero-slide-active opacity-100" : "pointer-events-none opacity-0",
               )}
             >
               <img src={slide.imageUrl} alt="" className="size-full object-cover" />
-              <span className="absolute inset-x-0 bottom-0 line-clamp-1 bg-gradient-to-t from-black/70 to-transparent px-3 pb-7 pt-10 text-sm font-semibold text-white">
-                {slide.title}
+              <span className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-gradient-to-t from-black/75 to-transparent px-3 pb-7 pt-12 text-white">
+                <span className="line-clamp-1 text-sm font-semibold">{slide.title}</span>
+                {slide.subtitle && <span className="line-clamp-1 text-xs opacity-90">{slide.subtitle}</span>}
               </span>
-            </Link>
+            </SlideWrapper>
           ))}
 
-          <span className="pointer-events-none absolute start-2 top-2 z-20 rounded-full bg-primary px-2.5 py-1 text-[11px] font-bold text-primary-foreground">
-            {t("menu.popular")}
+          <span
+            className={cn(
+              "pointer-events-none absolute start-2 top-2 z-20 rounded-full px-2.5 py-1 text-[11px] font-bold",
+              slides[current].kind === "offer"
+                ? "bg-brand-accent text-brand-accent-foreground"
+                : "bg-primary text-primary-foreground",
+            )}
+          >
+            {slides[current].kind === "offer" ? t("menu.offer") : t("menu.popular")}
           </span>
 
           {slides.length > 1 && (
