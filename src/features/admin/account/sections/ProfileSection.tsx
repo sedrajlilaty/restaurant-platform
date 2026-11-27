@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { User } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -36,9 +37,14 @@ export function ProfileSection({ initialName }: { initialName: string }) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <SectionCard title={t("account.profile.title")} description={t("account.profile.desc")}>
-        <FormField label={t("account.profile.name")} htmlFor="accountName" error={errors.name?.message}>
-          <Input id="accountName" autoComplete="name" {...form.register("name")} />
-        </FormField>
+        <div className="md:max-w-md">
+          <FormField label={t("account.profile.name")} htmlFor="accountName" error={errors.name?.message}>
+            <div className="group relative">
+              <User className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-primary" />
+              <Input id="accountName" autoComplete="name" className="ps-10" {...form.register("name")} />
+            </div>
+          </FormField>
+        </div>
         <SectionFooter pending={save.isPending} disabled={!isDirty} />
       </SectionCard>
     </form>

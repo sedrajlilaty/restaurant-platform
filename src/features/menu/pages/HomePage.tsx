@@ -7,7 +7,7 @@ import { Reveal } from "@/components/shared/Reveal"
 import { Input } from "@/components/ui/input"
 import { useLocalized } from "@/hooks/useLocalized"
 import { CategoryTabs } from "../components/CategoryTabs"
-import { GreetingHero } from "../components/GreetingHero"
+import { GreetingHero, type HeroSlide } from "../components/GreetingHero"
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard"
 import { useCategories, useProducts } from "../menu.api"
 
@@ -24,6 +24,12 @@ export function HomePage() {
 
   const categories = useCategories()
   const products = useProducts({ limit: 12 })
+
+  // صور الأصناف الأكثر طلباً يلي بيرفعها صاحب المطعم لكل صنف
+  const slides: HeroSlide[] = (products.data?.items ?? [])
+    .filter((product) => product.available && product.imageUrl)
+    .slice(0, 5)
+    .map((product) => ({ id: product.id, imageUrl: product.imageUrl as string, title: l(product.name) }))
 
   function submitSearch(e: FormEvent) {
     e.preventDefault()
@@ -45,9 +51,9 @@ export function HomePage() {
       </form>
 
       {categories.isPending ? (
-        <div className="h-44 animate-pulse rounded-3xl bg-muted md:h-56" />
+        <div className="h-48 animate-pulse rounded-3xl bg-muted md:h-60" />
       ) : (
-        <GreetingHero words={(categories.data ?? []).map((c) => l(c.name))} />
+        <GreetingHero words={(categories.data ?? []).map((c) => l(c.name))} slides={slides} />
       )}
 
       {categories.data && (

@@ -454,7 +454,18 @@
       "confirm": "Confirm new password",
       "wrong": "The current password is wrong",
       "saved": "Password changed"
-    },
+    },"show": "Show password",
+"hide": "Hide password",
+"groups": {
+  "current": "Confirm it's you",
+  "new": "Set a new one"
+},
+"strength": {
+  "label": "Password strength",
+  "weak": "Weak",
+  "medium": "Medium",
+  "strong": "Strong"
+},
     "errors": {
       "required": "This field is required",
       "passwordShort": "Password is too short, at least 6 characters",
