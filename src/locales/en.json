@@ -94,6 +94,8 @@
     "soon": "This page is under construction"
   },
   "menu": {
+    "prevSlide": "Previous",
+"nextSlide": "Next",
     "offer": "Offer",
     "greetingMorning": "Good morning",
 "greetingEvening": "Good evening",
@@ -629,7 +631,7 @@
   },
   "banners": {
   "title": "Banners and offers",
-  "subtitle": "The pictures shown in the slideshow at the top of the home page, together with photos of the most popular items.",
+  "subtitle": "The pictures that rotate in the slideshow at the top of the home page.",
   "hint": "The slideshow shows only the first 6 visible banners. Drag a banner to change its order.",
   "add": "Add banner",
   "empty": "No banners yet",

@@ -7,7 +7,7 @@ import { Reveal } from "@/components/shared/Reveal"
 import { Input } from "@/components/ui/input"
 import { useLocalized } from "@/hooks/useLocalized"
 import { CategoryTabs } from "../components/CategoryTabs"
-import { GreetingHero, type HeroSlide } from "../components/GreetingHero"
+import { ImageSlider, type SliderSlide } from "../components/ImageSlider"
 import { ProductCard, ProductCardSkeleton } from "../components/ProductCard"
 import { useBanners, useCategories, useProducts } from "../menu.api"
 
@@ -28,29 +28,16 @@ export function HomePage() {
   const categories = useCategories()
   const products = useProducts({ limit: 12 })
 
-  // العروض يلي بيضيفها صاحب المطعم أولاً، وبعدها صور الأصناف الأكثر طلباً
-  const offerSlides: HeroSlide[] = (banners.data ?? [])
+  // صور البنرات يلي بيرفعها صاحب المطعم من صفحة البنرات
+  const slides: SliderSlide[] = (banners.data ?? [])
     .filter((banner) => banner.imageUrl)
+    .slice(0, MAX_SLIDES)
     .map((banner) => ({
-      id: `offer-${banner.id}`,
-      kind: "offer" as const,
+      id: banner.id,
       imageUrl: banner.imageUrl as string,
       title: l(banner.title),
-      subtitle: banner.subtitle ? l(banner.subtitle) : undefined,
       to: banner.ctaLink ?? undefined,
     }))
-
-  const popularSlides: HeroSlide[] = (products.data?.items ?? [])
-    .filter((product) => product.available && product.imageUrl)
-    .map((product) => ({
-      id: `popular-${product.id}`,
-      kind: "popular" as const,
-      imageUrl: product.imageUrl as string,
-      title: l(product.name),
-      to: `/product/${product.id}`,
-    }))
-
-  const slides = [...offerSlides, ...popularSlides].slice(0, MAX_SLIDES)
 
   function submitSearch(e: FormEvent) {
     e.preventDefault()
@@ -71,10 +58,10 @@ export function HomePage() {
         />
       </form>
 
-      {categories.isPending ? (
-        <div className="h-48 animate-pulse rounded-3xl bg-muted md:h-60" />
+      {banners.isPending ? (
+        <div className="aspect-[16/9] animate-pulse rounded-3xl bg-muted md:aspect-[8/3] md:max-h-[400px]" />
       ) : (
-        <GreetingHero words={(categories.data ?? []).map((c) => l(c.name))} slides={slides} />
+        slides.length > 0 && <ImageSlider slides={slides} />
       )}
 
       {categories.data && (
