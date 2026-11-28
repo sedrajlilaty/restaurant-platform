@@ -626,5 +626,46 @@
     "role": "Platform admin",
     "tagline": "Main control panel",
     "hello": "Hi, {{name}}"
+  },
+  "banners": {
+  "title": "Banners and offers",
+  "subtitle": "The pictures shown in the slideshow at the top of the home page, together with photos of the most popular items.",
+  "hint": "The slideshow shows only the first 6 visible banners. Drag a banner to change its order.",
+  "add": "Add banner",
+  "empty": "No banners yet",
+  "emptyHint": "Add an offer picture or a photo that shows off your restaurant, and it will appear on the home page.",
+  "drag": "Drag to reorder",
+  "active": "Visible",
+  "hidden": "Hidden",
+  "noLink": "No link",
+  "form": {
+    "addTitle": "Add banner",
+    "editTitle": "Edit banner",
+    "image": "Image",
+    "imageHint": "A wide picture, about 8:3, for example 1920×720.",
+    "titleAr": "Title in Arabic",
+    "titleEn": "Title in English",
+    "subtitleAr": "Description in Arabic (optional)",
+    "subtitleEn": "Description in English (optional)",
+    "ctaLabelAr": "Button text in Arabic (optional)",
+    "ctaLabelEn": "Button text in English (optional)",
+    "link": "Link (optional)",
+    "linkHint": "An internal path like /category/ID or a full https link. If left empty nothing opens.",
+    "visible": "Visible to customers"
+  },
+  "delete": {
+    "title": "Delete banner",
+    "desc": "The banner \"{{name}}\" will be removed from the home page."
+  },
+  "toast": {
+    "added": "Banner added",
+    "updated": "Changes saved",
+    "deleted": "Banner deleted"
+  },
+  "errors": {
+    "generic": "Something went wrong, please try again",
+    "imageRequired": "The image is required",
+    "link": "The link must start with / or https://"
   }
+}
 }

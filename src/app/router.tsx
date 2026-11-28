@@ -15,6 +15,7 @@ import { CheckoutPage, OrderSuccessPage, TableEntryPage } from "@/features/check
 import { AccountPage, AppearancePage, CategoriesPage, OptionsPage, ProductsPage, TablesPage, TablesPrintPage, SettingsPage, DashboardPage } from "@/features/admin"
 import { AboutPage, CategoryPage, HomePage, ProductPage, SearchPage } from "@/features/menu"
 import { PlansPage } from "@/features/superadmin"
+import { BannersPage } from "@/features/admin/banners"
 const page = (titleKey: string): ReactNode => <PlaceholderPage titleKey={titleKey} />
 const gated = (feature: FeatureKey, titleKey: string): ReactNode => (
   <RequireFeature feature={feature}>{page(titleKey)}</RequireFeature>
@@ -61,7 +62,7 @@ export const restaurantRouter = createBrowserRouter([
 { path: "products", element: <ProductsPage /> },     
 { path: "options", element: <OptionsPage /> },
       { path: "coupons", element: gated("coupons", "nav.coupons") },
-      { path: "banners", element: gated("banners", "nav.banners") },
+      { path: "banners", element: <RequireFeature feature="banners"><BannersPage /></RequireFeature> },
       {
         path: "tables",
         element: (

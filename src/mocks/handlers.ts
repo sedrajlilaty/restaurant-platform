@@ -3,7 +3,8 @@ import type { OrderPayload, PlacedOrder, PlacedOrderItem } from "@/features/chec
 import { adminHandlers } from "./adminHandlers"
 import { categoriesDb } from "./categoriesData"
 import {  tenants } from "./data"
-import { banners, optionGroupsByProduct, products } from "./menuData"
+import { optionGroupsByProduct, products } from "./menuData"
+import { bannersDb } from "./bannersData"
 import { tablesDb } from "./tablesData"
 import type { StoreSettings } from "@/features/tenant"
 import { settingsDb } from "./settingsData"
@@ -41,7 +42,19 @@ export const handlers = [
   // المنيو
   http.get("/api/public/banners", async () => {
     await delay(300)
-    return HttpResponse.json(banners)
+    return HttpResponse.json(
+      bannersDb.list
+        .filter((b) => b.isActive)
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+        .map(({ id, title, subtitle, ctaLabel, ctaLink, imageUrl }) => ({
+          id,
+          title,
+          subtitle,
+          ctaLabel,
+          ctaLink,
+          imageUrl,
+        })),
+    )
   }),
 
    http.get("/api/public/categories", async () => {

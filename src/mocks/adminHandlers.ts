@@ -10,15 +10,18 @@ import { changeAccountPassword, renameAccount, tokenFrom } from "./accountsData"
 import { productsDb, type ProductInput } from "./productsData"
 type CategoryInput = Pick<AdminCategory, "name" | "imageUrl" | "isActive">
 import { optionsDb, type ProductOptions } from "./optionsData"
+import { fileToDataUrl } from "./imageData"
+import { bannerHandlers } from "./bannersHandlers"
 
 export const adminHandlers = [
+  ...bannerHandlers,
   // رفع الصور: بالتجربة بيرجع رابط مؤقت للملف (بيختفي بتحديث الصفحة)
   http.post("/api/admin/uploads", async ({ request }) => {
     await delay(500)
     const form = await request.formData()
     const file = form.get("file")
     if (!(file instanceof File)) return HttpResponse.json({ message: "No file" }, { status: 400 })
-    return HttpResponse.json({ url: URL.createObjectURL(file) })
+    return HttpResponse.json({ url: await fileToDataUrl(file) })
   }),
 
   // الطاولات
