@@ -16,7 +16,7 @@ const GRID = "grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4 xl:g
 const CARD_HOVER =
   "h-full transition-transform duration-300 ease-out hover:-translate-y-1.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0 [&>*]:h-full [&>*]:transition-shadow [&>*]:duration-300 hover:[&>*]:shadow-xl"
 
-const MAX_SLIDES = 6
+const MAX_SLIDES = 8
 
 export function HomePage() {
   const { t } = useTranslation()
@@ -58,12 +58,6 @@ export function HomePage() {
         />
       </form>
 
-      {banners.isPending ? (
-        <div className="aspect-[16/9] animate-pulse rounded-3xl bg-muted md:aspect-[8/3] md:max-h-[400px]" />
-      ) : (
-        slides.length > 0 && <ImageSlider slides={slides} />
-      )}
-
       {categories.data && (
         <CategoryTabs
           categories={categories.data}
@@ -72,6 +66,15 @@ export function HomePage() {
             if (id) navigate(`/category/${id}`)
           }}
         />
+      )}
+
+      {banners.isPending ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="aspect-[16/9] animate-pulse rounded-3xl bg-muted md:aspect-[2/1]" />
+          <div className="hidden aspect-[2/1] animate-pulse rounded-3xl bg-muted md:block" />
+        </div>
+      ) : (
+        slides.length > 0 && <ImageSlider slides={slides} />
       )}
 
       <section className="space-y-4">

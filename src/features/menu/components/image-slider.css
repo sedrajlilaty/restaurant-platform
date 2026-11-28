@@ -1,34 +1,16 @@
-.slider-slide img {
-  transform: scale(1);
-}
-
-.slider-slide[data-active="true"] img {
-  animation: slider-zoom 9s ease-out forwards;
-}
-
-.slider[data-paused="true"] .slider-slide[data-active="true"] img,
-.slider[data-paused="true"] .slider-fill {
-  animation-play-state: paused;
-}
-
 .slider-fill {
   display: block;
   height: 100%;
   width: 0;
   border-radius: inherit;
-  background: #fff;
+  background: var(--primary);
   animation-name: slider-fill;
   animation-timing-function: linear;
   animation-fill-mode: forwards;
 }
 
-@keyframes slider-zoom {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.08);
-  }
+.slider[data-paused="true"] .slider-fill {
+  animation-play-state: paused;
 }
 
 @keyframes slider-fill {
@@ -41,9 +23,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slider-slide[data-active="true"] img {
-    animation: none;
-  }
   .slider-fill {
     animation: none;
     width: 100%;

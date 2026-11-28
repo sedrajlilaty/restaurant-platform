@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, type ReactNode } from "react"
+import { useEffect, useRef, type ReactNode } from "react"
 import {
   Beef,
   Cake,
@@ -54,14 +54,15 @@ function iconFor(name: Category["name"]): LucideIcon {
   return rule ? rule[1] : Utensils
 }
 
-type TabProps = {
+type TileProps = {
   selected: boolean
+  label: string
   onClick: () => void
   setRef: (el: HTMLButtonElement | null) => void
   children: ReactNode
 }
 
-function Tab({ selected, onClick, setRef, children }: TabProps) {
+function Tile({ selected, label, onClick, setRef, children }: TileProps) {
   return (
     <li className="shrink-0">
       <button
@@ -69,119 +70,67 @@ function Tab({ selected, onClick, setRef, children }: TabProps) {
         type="button"
         aria-pressed={selected}
         onClick={onClick}
-        className={cn(
-          "group relative z-10 flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-medium outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring active:scale-95",
-          selected
-            ? "border-transparent text-primary-foreground"
-            : "bg-card text-foreground hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md",
-        )}
+        className="group flex w-24 flex-col items-center gap-2 outline-none md:w-28"
       >
-        {children}
+        <span
+          className={cn(
+            "relative grid size-20 place-items-center overflow-hidden rounded-3xl border bg-primary/10 text-primary shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-ring group-active:scale-95 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 md:size-24",
+            selected && "border-primary ring-2 ring-primary ring-offset-2 ring-offset-background",
+          )}
+        >
+          {children}
+        </span>
+        <span className={cn("line-clamp-1 text-sm", selected ? "font-bold text-primary" : "font-medium")}>{label}</span>
       </button>
     </li>
   )
 }
 
-const ICON_CLASS = "size-5 shrink-0 transition-transform duration-300 group-hover:-rotate-12 group-hover:scale-110"
+const IMAGE_CLASS =
+  "size-full object-cover transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
 
 export function CategoryTabs({ categories, selectedId, onSelect }: Props) {
   const { t } = useTranslation()
   const l = useLocalized()
+  const buttons = useRef(new Map<string, HTMLButtonElement>())
 
-  const listRef = useRef<HTMLDivElement>(null)
-  const indicatorRef = useRef<HTMLSpanElement>(null)
-  const buttonRefs = useRef(new Map<string, HTMLButtonElement>())
-  const placed = useRef(false)
-
-  useLayoutEffect(() => {
-    const list = listRef.current
-    const indicator = indicatorRef.current
-    if (!list || !indicator) return
-
-    let cancelled = false
-
-    const place = (scroll: boolean) => {
-      const button = buttonRefs.current.get(selectedId ?? "all")
-      if (!button) return
-
-      const first = !placed.current
-      if (first) indicator.style.transition = "none"
-
-      indicator.style.width = `${button.offsetWidth}px`
-      indicator.style.height = `${button.offsetHeight}px`
-      indicator.style.transform = `translate(${button.offsetLeft}px, ${button.offsetTop}px)`
-      indicator.style.opacity = "1"
-
-      if (first) {
-        void indicator.offsetWidth
-        indicator.style.transition = ""
-        placed.current = true
-      }
-
-      if (scroll) {
-        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        button.scrollIntoView({
-          inline: "center",
-          block: "nearest",
-          behavior: first || reduced ? "auto" : "smooth",
-        })
-      }
-    }
-
-    place(true)
-
-    const observer = new ResizeObserver(() => place(false))
-    observer.observe(list)
-    void document.fonts?.ready.then(() => {
-      if (!cancelled) place(false)
-    })
-
-    return () => {
-      cancelled = true
-      observer.disconnect()
-    }
+  useEffect(() => {
+    const button = buttons.current.get(selectedId ?? "all")
+    if (!button) return
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    button.scrollIntoView({ inline: "center", block: "nearest", behavior: reduced ? "auto" : "smooth" })
   }, [selectedId, categories])
 
   function register(key: string) {
     return (el: HTMLButtonElement | null) => {
-      if (el) buttonRefs.current.set(key, el)
-      else buttonRefs.current.delete(key)
+      if (el) buttons.current.set(key, el)
+      else buttons.current.delete(key)
     }
   }
 
   return (
-    <div
-      ref={listRef}
-      className="relative -mx-4 overflow-x-auto px-4 py-1 [mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%_-_1rem),transparent)] [scrollbar-width:none]"
-    >
-      <span
-        ref={indicatorRef}
-        aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 z-0 rounded-full bg-primary opacity-0 shadow-sm transition-[transform,width,height] duration-300 ease-out motion-reduce:transition-none"
-      />
-
-      <ul className="flex w-max gap-2">
-        <Tab selected={selectedId === null} onClick={() => onSelect(null)} setRef={register("all")}>
-          <UtensilsCrossed className={ICON_CLASS} />
-          {t("menu.all")}
-        </Tab>
+    <div className="-mx-4 overflow-x-auto px-4 py-3 [mask-image:linear-gradient(to_right,transparent,black_1rem,black_calc(100%_-_1rem),transparent)] [scrollbar-width:none]">
+      <ul className="flex w-max gap-3 md:gap-4">
+        <Tile selected={selectedId === null} label={t("menu.all")} onClick={() => onSelect(null)} setRef={register("all")}>
+          <UtensilsCrossed className="size-8 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none" />
+        </Tile>
 
         {categories.map((category) => {
           const Icon = iconFor(category.name)
           return (
-            <Tab
+            <Tile
               key={category.id}
               selected={selectedId === category.id}
+              label={l(category.name)}
               onClick={() => onSelect(category.id)}
               setRef={register(category.id)}
             >
               {category.imageUrl ? (
-                <img src={category.imageUrl} alt="" className="size-6 shrink-0 rounded-full object-cover" />
+                <img src={category.imageUrl} alt="" loading="lazy" className={IMAGE_CLASS} />
               ) : (
-                <Icon className={ICON_CLASS} />
+                <Icon className="size-8 transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none" />
               )}
-              {l(category.name)}
-            </Tab>
+            </Tile>
           )
         })}
       </ul>

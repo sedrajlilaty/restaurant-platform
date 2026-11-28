@@ -644,7 +644,7 @@
     "addTitle": "Add banner",
     "editTitle": "Edit banner",
     "image": "Image",
-    "imageHint": "A wide picture, about 8:3, for example 1920×720.",
+    "imageHint": "A wide picture with a 2:1 ratio, for example 1200×600. Two pictures show side by side on a computer and one on a phone.",
     "titleAr": "Title in Arabic",
     "titleEn": "Title in English",
     "subtitleAr": "Description in Arabic (optional)",
